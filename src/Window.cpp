@@ -1,7 +1,7 @@
 #include "Window.h"
 
 Window::Window(
-	const char* className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc
+	const char* className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc, const char* iconName
 )
 {
 	WNDCLASSA wc{};
@@ -9,6 +9,11 @@ Window::Window(
 	wc.hInstance = GetModuleHandleA(nullptr);
 	wc.lpszClassName = className;
 	wc.lpfnWndProc = wndProc;
+
+	if (iconName)
+	{
+		wc.hIcon = LoadIconA(GetModuleHandleA(nullptr), iconName);
+	}
 	
 	unsigned short ret = RegisterClassA(&wc);
 	if (!ret)

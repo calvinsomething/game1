@@ -5,4 +5,6 @@ class MainWindow: public Window {
 public:
 	MainWindow();
 	~MainWindow();
+	MainWindow(const MainWindow&) = delete;
+	MainWindow& operator=(const MainWindow&) = delete;
 };

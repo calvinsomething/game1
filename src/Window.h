@@ -1,8 +1,8 @@
 #include <windows.h>
-#include <exception>
 
 class Window
 {
+protected:
 	HINSTANCE hInstance;
 	HWND hWnd;
 

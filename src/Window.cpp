@@ -1,5 +1,7 @@
 #include "Window.h"
 
+#include <exception>
+
 Window::Window(
 	const char* className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc, const char* iconName
 )

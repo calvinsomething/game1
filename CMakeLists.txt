@@ -7,4 +7,8 @@ add_executable(${PROJECT_NAME} WIN32
 	src/main.cpp
 	src/Window.cpp
 	src/MainWindow.cpp
+	src/Graphics.cpp
 	src/resources.rc)
+
+target_link_libraries(${PROJECT_NAME}
+	d3d11.lib)

@@ -1,7 +1,5 @@
 #include "Graphics.h"
 
-#include <exception>
-
 Graphics::Graphics(HWND hWnd)
 {
 	DXGI_SWAP_CHAIN_DESC scd{};

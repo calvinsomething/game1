@@ -1,6 +1,3 @@
-#include <windows.h>
-#include <exception>
-
 #include "MainWindow.h"
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* pCmdLine, int nCmdShow)

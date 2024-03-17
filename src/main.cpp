@@ -2,7 +2,7 @@
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* pCmdLine, int nCmdShow)
 {
-	int exitCode = 1;
+	int exitCode = 0;
 	try {
 		MainWindow window{};
 
@@ -14,6 +14,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* pCmdLin
 			window.doFrame();
 		}
 	} catch (const std::exception& e) {
+		MessageBoxA(nullptr, e.what(), "Exception Thrown", MB_OK | MB_TASKMODAL);
+	} catch (...) {
+		MessageBoxA(nullptr, "Unknown error occurred.", "Exception Thrown", MB_OK);
 	}
 	return exitCode;
 }

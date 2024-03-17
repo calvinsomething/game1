@@ -1,7 +1,11 @@
 #include "Graphics.h"
+#include "Exception.h"
+
 
 Graphics::Graphics(HWND hWnd)
 {
+	using namespace Microsoft::WRL;
+
 	DXGI_SWAP_CHAIN_DESC scd{};
 
 	scd.BufferDesc.Width = 0;
@@ -31,10 +35,10 @@ Graphics::Graphics(HWND hWnd)
 		0,
 		D3D11_SDK_VERSION,
 		&scd,
-		&pSwapChain,
-		&pDevice,
+		pSwapChain.GetAddressOf(),
+		pDevice.GetAddressOf(),
 		nullptr,
-		&pCtx
+		pCtx.GetAddressOf()
 	);
 
 	if (FAILED(hr))
@@ -42,34 +46,29 @@ Graphics::Graphics(HWND hWnd)
 		throw std::exception("DXGI_SWAP_EFFECT_DISCARD error");
 	}
 
-	ID3D11Resource* pSurface = nullptr;
+	ComPtr<ID3D11Resource> pSurface;
 
 	hr = pSwapChain->GetBuffer(
 		0,
 		__uuidof(ID3D11Resource),
-		reinterpret_cast<void**>(&pSurface)
+		reinterpret_cast<void**>(pSurface.GetAddressOf())
 	); 
 
 	if (FAILED(hr))
 	{
 	}
 
-	pDevice->CreateRenderTargetView(pSurface, nullptr, &pTarget);
-
-	pSurface->Release();
+	pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf());
 }
 
 Graphics::~Graphics()
 {
-	pSwapChain->Release();
-	pDevice->Release();
-	pCtx->Release();
 }
 
 void Graphics::Clear(Color color)
 {
 	color.alpha = 1;
-	pCtx->ClearRenderTargetView(pTarget, reinterpret_cast<float*>(&color));
+	pCtx->ClearRenderTargetView(pTarget.Get(), reinterpret_cast<float*>(&color));
 }
 
 void Graphics::EndFrame()

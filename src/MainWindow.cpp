@@ -5,7 +5,7 @@ LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 {
 	switch (msg)
 	{
-	case WM_DESTROY:
+	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
 	}
@@ -22,5 +22,4 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-	Window::~Window();
 }

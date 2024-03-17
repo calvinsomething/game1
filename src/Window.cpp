@@ -1,5 +1,29 @@
 #include "Window.h"
 
+#include "Exception.h"
+
+#define THROW_IF_FAILED(fn)\
+{\
+	HRESULT hr = fn;\
+	if (FAILED(hr))\
+	{\
+		throw Exception("Window class error.", hr, __FILE__, __LINE__);\
+	}\
+}
+#define THROW_IF_FALSE(value)\
+{\
+	if (!value)\
+	{\
+		char *buffer = nullptr;\
+		int code = GetLastError();\
+		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,\
+				nullptr, code, 0, reinterpret_cast<char*>(&buffer), 0, nullptr);\
+		Exception e(buffer, code, __FILE__, __LINE__);\
+		LocalFree(buffer);\
+		throw e;\
+	}\
+}
+
 Window::Window(
 	const char* className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc, const char* iconName
 )
@@ -15,25 +39,14 @@ Window::Window(
 		wc.hIcon = LoadIconA(GetModuleHandleA(nullptr), iconName);
 	}
 	
-	unsigned short ret = RegisterClassA(&wc);
-	if (!ret)
-	{
-		unsigned long errCode = GetLastError(); 
-		throw std::exception("RegisterClass failed with error code:", errCode);
-		return;
-	}
+	THROW_IF_FALSE(RegisterClassA(&wc));
 
 	hWnd = CreateWindowExA(
 		windowExStyle, className, className, windowStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		nullptr, nullptr, wc.hInstance, nullptr
 	);
-
-	if (!hWnd)
-	{
-		throw(std::exception("CreateWindow failed with return value:"));
-		return;
-	}
+	THROW_IF_FALSE(hWnd);
 }
 
 Window::~Window()

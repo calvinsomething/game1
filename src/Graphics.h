@@ -3,10 +3,10 @@
 #include "structs.h"
 
 class Graphics {
-	IDXGISwapChain* pSwapChain;
-	ID3D11Device* pDevice;
-	ID3D11DeviceContext* pCtx;
-	ID3D11RenderTargetView* pTarget;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
+	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pCtx;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 
 public:
 	Graphics(HWND hWnd);

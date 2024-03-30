@@ -11,7 +11,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* pCmdLin
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-			window.doFrame();
+			window.RenderFrame();
 		}
 	} catch (const std::exception& e) {
 		MessageBoxA(nullptr, e.what(), "Exception Thrown", MB_OK | MB_TASKMODAL);

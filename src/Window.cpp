@@ -1,29 +1,17 @@
 #include "Window.h"
 
-#include "Exception.h"
-
-#define THROW_IF_FAILED(fn)\
-{\
-	HRESULT hr = fn;\
-	if (FAILED(hr))\
-	{\
-		throw Exception("Window class error.", hr, __FILE__, __LINE__);\
-	}\
-}
-#define THROW_IF_FALSE(value)\
-{\
-	if (!value)\
-	{\
-		char *buffer = nullptr;\
-		int code = GetLastError();\
-		FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,\
-				nullptr, code, 0, reinterpret_cast<char*>(&buffer), 0, nullptr);\
-		Exception e(buffer, code, __FILE__, __LINE__);\
-		LocalFree(buffer);\
-		throw e;\
-	}\
+// Exception Handling
+Exception get_windows_exception(HRESULT error_code, const char* file, unsigned line)
+{
+	char *buffer = nullptr;
+	FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+			nullptr, error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<char*>(&buffer), 0, nullptr);
+	Exception e(buffer, error_code, file, line);
+	LocalFree(buffer);
+	return e;
 }
 
+// Window
 Window::Window(
 	const char* className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc, const char* iconName
 )
@@ -53,3 +41,4 @@ Window::~Window()
 {
 	DestroyWindow(hWnd);
 }
+

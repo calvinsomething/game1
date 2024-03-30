@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Graphics.h"
 #include "Window.h"
 
@@ -11,7 +13,7 @@ public:
 	MainWindow(const MainWindow&) = delete;
 	MainWindow& operator=(const MainWindow&) = delete;
 
-	void doFrame()
+	void RenderFrame()
 	{
 		pGfx->Clear({0.2f, 1.0f, 0.3f});
 		pGfx->EndFrame();

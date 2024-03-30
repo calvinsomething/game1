@@ -9,10 +9,13 @@ add_executable(${PROJECT_NAME} WIN32
 	src/Window.cpp
 	src/MainWindow.cpp
 	src/Graphics.cpp
+	src/GfxDebug.cpp
 	src/resources.rc)
 
 target_link_libraries(${PROJECT_NAME}
-	d3d11.lib)
+	d3d11.lib
+	dxguid.lib
+	)
 
 target_precompile_headers(${PROJECT_NAME}
 	PRIVATE src/pch.h)

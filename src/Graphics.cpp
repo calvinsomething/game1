@@ -1,7 +1,34 @@
 #include "Graphics.h"
-#include "Exception.h"
 
+#include "Window.h"
 
+// Exception Handling
+#define THROW_IF_DEVICE_REMOVED(fn)\
+{\
+	HRESULT hr = fn;\
+	if (FAILED(hr))\
+	{\
+		if (hr == DXGI_ERROR_DEVICE_REMOVED)\
+		{\
+			hr = pDevice->GetDeviceRemovedReason();\
+		}\
+		throw get_windows_exception(hr, __FILE__, __LINE__);\
+	}\
+}
+
+#ifndef NDEBUG
+#undef THROW_IF_FAILED
+#define THROW_IF_FAILED(fn)\
+{\
+	HRESULT hr = fn;\
+	if (FAILED(hr))\
+	{\
+		throw debug.GetException(hr, __FILE__, __LINE__);\
+	}\
+}
+#endif
+
+// Graphics
 Graphics::Graphics(HWND hWnd)
 {
 	using namespace Microsoft::WRL;
@@ -26,11 +53,16 @@ Graphics::Graphics(HWND hWnd)
 	scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	scd.Flags = 0;
 
-	HRESULT hr = D3D11CreateDeviceAndSwapChain(
+	unsigned create_device_flags = 0;
+#ifndef NDEBUG
+	create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	THROW_IF_FAILED(D3D11CreateDeviceAndSwapChain(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		D3D11_CREATE_DEVICE_DEBUG,
+		create_device_flags,
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
@@ -39,26 +71,17 @@ Graphics::Graphics(HWND hWnd)
 		pDevice.GetAddressOf(),
 		nullptr,
 		pCtx.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		throw std::exception("DXGI_SWAP_EFFECT_DISCARD error");
-	}
+	));
 
 	ComPtr<ID3D11Resource> pSurface;
 
-	hr = pSwapChain->GetBuffer(
+	THROW_IF_FAILED(pSwapChain->GetBuffer(
 		0,
 		__uuidof(ID3D11Resource),
 		reinterpret_cast<void**>(pSurface.GetAddressOf())
-	); 
+	));
 
-	if (FAILED(hr))
-	{
-	}
-
-	pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf());
+	THROW_IF_FAILED(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));
 }
 
 Graphics::~Graphics()
@@ -73,5 +96,5 @@ void Graphics::Clear(Color color)
 
 void Graphics::EndFrame()
 {
-	pSwapChain->Present(1, 0);
+	THROW_IF_DEVICE_REMOVED(pSwapChain->Present(1, 0));
 }

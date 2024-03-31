@@ -7,3 +7,10 @@ struct Color
 	float blue;
 	float alpha;
 };
+
+struct Vertex
+{
+	float x;
+	float y;
+};
+

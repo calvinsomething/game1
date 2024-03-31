@@ -16,16 +16,22 @@
 	}\
 }
 
-#ifndef NDEBUG
+#ifdef NDEBUG
+#define CHECK_ERRORS()
+
+#else
 #undef THROW_IF_FAILED
 #define THROW_IF_FAILED(fn)\
 {\
+	debug.SetIndex();\
 	HRESULT hr = fn;\
 	if (FAILED(hr))\
 	{\
 		throw debug.GetException(hr, __FILE__, __LINE__);\
 	}\
 }
+#define CHECK_ERRORS() debug.CheckErrors(__FILE__, __LINE__)
+
 #endif
 
 // Graphics
@@ -97,4 +103,30 @@ void Graphics::Clear(Color color)
 void Graphics::EndFrame()
 {
 	THROW_IF_DEVICE_REMOVED(pSwapChain->Present(1, 0));
+}
+
+void Graphics::DrawTriangle()
+{
+	using namespace Microsoft::WRL;
+
+	Vertex vertices[] = {{0.0f, 0.5f}, {0.5f, -0.5f}, {-0.5f, -0.5f}};
+
+	ComPtr<ID3D11Buffer> pVertexBuffer;
+	D3D11_BUFFER_DESC bd{};
+	bd.ByteWidth = sizeof(vertices);
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.MiscFlags = 0;
+	bd.StructureByteStride = sizeof(Vertex);
+
+	D3D11_SUBRESOURCE_DATA sd{};
+	sd.pSysMem = vertices;
+
+	THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pVertexBuffer.GetAddressOf()));
+
+	unsigned stride = sizeof(Vertex), offset = 0;
+	pCtx->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+
+	pCtx->Draw(3, 0);
+	CHECK_ERRORS();
 }

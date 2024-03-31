@@ -15,7 +15,8 @@ public:
 
 	void RenderFrame()
 	{
-		pGfx->Clear({0.2f, 1.0f, 0.3f});
+		//pGfx->Clear({0.2f, 1.0f, 0.3f});
+		pGfx->DrawTriangle();
 		pGfx->EndFrame();
 	}
 };

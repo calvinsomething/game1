@@ -26,4 +26,5 @@ public:
 
 	void Clear(Color color);
 	void EndFrame();
+	void DrawTriangle();
 };

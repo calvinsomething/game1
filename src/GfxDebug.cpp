@@ -2,7 +2,7 @@
 
 #include "Window.h"
 
-GfxDebug::GfxDebug()
+GfxDebug::GfxDebug() : msg_index(), info_desc_index(), full()
 {
 	HMODULE lib = LoadLibraryA("Dxgidebug.dll");
 	THROW_IF_FALSE(lib);
@@ -14,30 +14,75 @@ GfxDebug::GfxDebug()
 
 	pInfoQueue->PushEmptyStorageFilter(DXGI_DEBUG_ALL);
 	pInfoQueue->PushEmptyRetrievalFilter(DXGI_DEBUG_ALL);
+	
+	memset(info_desc, 0, sizeof(info_desc));
+}
+
+void GfxDebug::SetIndex()
+{
+	msg_index = pInfoQueue->GetNumStoredMessagesAllowedByRetrievalFilters(DXGI_DEBUG_ALL);
+}
+
+void GfxDebug::Clear()
+{
+	pInfoQueue->ClearStoredMessages(DXGI_DEBUG_ALL);
+}
+
+bool GfxDebug::GetAllMessages()
+{
+	for (; msg_index < pInfoQueue->GetNumStoredMessagesAllowedByRetrievalFilters(DXGI_DEBUG_ALL); msg_index++)
+	{
+		if (!full)
+		{
+			GetDebugMessage();
+		}
+	}
+	return info_desc_index;
 }
 
 Exception GfxDebug::GetException(unsigned error_code, const char* file, unsigned line)
 {
-	memset(info_desc, 0, sizeof(info_desc));
-	for (int i = 0; i < pInfoQueue->GetNumStoredMessagesAllowedByRetrievalFilters(DXGI_DEBUG_ALL); i++)
+	if (GetAllMessages())
 	{
-		SIZE_T msgSize = 0;
-		THROW_IF_FAILED(pInfoQueue->GetMessageA(DXGI_DEBUG_ALL, i, nullptr, &msgSize));
-
-		DXGI_INFO_QUEUE_MESSAGE* msg = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(alloca(msgSize));
-		THROW_IF_FAILED(pInfoQueue->GetMessageA(DXGI_DEBUG_ALL, i, msg, &msgSize));
-
-		if (msg->DescriptionByteLength)
-		{
-			int len = msg->DescriptionByteLength;
-			if (len >= sizeof(info_desc))
-			{
-				len = sizeof(info_desc);
-				info_desc[len - 1] = 0;
-			}
-			memcpy(info_desc, msg->pDescription, len);
-			return Exception(info_desc, msg->ID, file, line);
-		}
+		return Exception(info_desc, error_code, file, line);
 	}
-	return Exception("no DXGI messages", error_code, file, line);
+	return Exception("no DXGI debug messages", error_code, file, line);
 }
+
+void GfxDebug::GetDebugMessage()
+{
+	SIZE_T msgSize = 0;
+	THROW_IF_FAILED(pInfoQueue->GetMessageA(DXGI_DEBUG_ALL, msg_index, nullptr, &msgSize));
+
+	DXGI_INFO_QUEUE_MESSAGE* msg = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(alloca(msgSize));
+	THROW_IF_FAILED(pInfoQueue->GetMessageA(DXGI_DEBUG_ALL, msg_index, msg, &msgSize));
+
+	if (msg->DescriptionByteLength)
+	{
+		if (info_desc_index)
+		{
+			memcpy(info_desc + info_desc_index, "\n\n", 2);
+			info_desc_index += 2;
+		}
+
+		int len = msg->DescriptionByteLength;
+		if (len > sizeof(info_desc) - info_desc_index - 2)
+		{
+			len = sizeof(info_desc) - info_desc_index - 1;
+		}
+
+		memcpy(info_desc + info_desc_index, msg->pDescription, len);
+		info_desc_index += len;
+
+		full = sizeof(info_desc) - info_desc_index < 30;
+	}
+}
+
+void GfxDebug::CheckErrors(const char* file, unsigned line)
+{
+	if (GetAllMessages())
+	{
+		throw Exception(info_desc, 999999999, file, line);
+	}
+}
+

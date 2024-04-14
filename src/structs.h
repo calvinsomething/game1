@@ -2,15 +2,16 @@
 
 struct Color
 {
-	float red;
-	float green;
-	float blue;
-	float alpha;
+    float red;
+    float green;
+    float blue;
+    float alpha;
 };
 
 struct Vertex
 {
-	float x;
-	float y;
+    float x;
+    float y;
+    float z;
+    float w;
 };
-

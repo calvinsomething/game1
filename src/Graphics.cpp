@@ -101,15 +101,31 @@ void Graphics::DrawTriangle()
                          {{0.5f, -0.5f, 0.0f, 1.0f}, {0, 255, 0, 255}},
                          {{-0.5f, -0.5f, 0.0f, 1.0f}, {0, 0, 255, 255}}};
 
-    ComPtr<ID3D11Buffer> pVertexBuffer;
+    unsigned indices[] = {0, 1, 2};
+
     D3D11_BUFFER_DESC bd{};
+    D3D11_SUBRESOURCE_DATA sd{};
+
+    // bind index buffer
+    ComPtr<ID3D11Buffer> pIndexBuffer;
+    bd.ByteWidth = sizeof(indices);
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bd.MiscFlags = 0;
+    bd.StructureByteStride = sizeof(unsigned);
+
+    sd.pSysMem = indices;
+
+    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pIndexBuffer.GetAddressOf()));
+    pCtx->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+    // bind vertex buffer
+    ComPtr<ID3D11Buffer> pVertexBuffer;
     bd.ByteWidth = sizeof(vertices);
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.MiscFlags = 0;
     bd.StructureByteStride = sizeof(Vertex);
 
-    D3D11_SUBRESOURCE_DATA sd{};
     sd.pSysMem = vertices;
 
     THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pVertexBuffer.GetAddressOf()));
@@ -152,6 +168,6 @@ void Graphics::DrawTriangle()
     vp.MaxDepth = 1;
     pCtx->RSSetViewports(1, &vp);
 
-    pCtx->Draw(3, 0);
+    pCtx->DrawIndexed(std::size(indices), 0, 0);
     CHECK_ERRORS();
 }

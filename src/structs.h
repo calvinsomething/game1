@@ -10,8 +10,18 @@ struct Color
 
 struct Vertex
 {
-    float x;
-    float y;
-    float z;
-    float w;
+    struct
+    {
+        float x;
+        float y;
+        float z;
+        float w;
+    } pos;
+    struct
+    {
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
+        unsigned char a;
+    } color;
 };

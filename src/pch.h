@@ -10,5 +10,6 @@
 
 // STD
 #include <exception>
+#include <iterator>
 #include <memory>
 #include <string>

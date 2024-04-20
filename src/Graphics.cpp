@@ -97,7 +97,9 @@ void Graphics::DrawTriangle()
 
     pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    Vertex vertices[] = {{0.0f, 0.5f, 0.0f, 1.0f}, {0.5f, -0.5f, 0.0f, 1.0f}, {-0.5f, -0.5f, 0.0f, 1.0f}};
+    Vertex vertices[] = {{{0.0f, 0.5f, 0.0f, 1.0f}, {255, 0, 0, 255}},
+                         {{0.5f, -0.5f, 0.0f, 1.0f}, {0, 255, 0, 255}},
+                         {{-0.5f, -0.5f, 0.0f, 1.0f}, {0, 0, 255, 255}}};
 
     ComPtr<ID3D11Buffer> pVertexBuffer;
     D3D11_BUFFER_DESC bd{};
@@ -125,8 +127,11 @@ void Graphics::DrawTriangle()
 
     ComPtr<ID3D11InputLayout> pInputLayout;
     D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
-    pDevice->CreateInputLayout(ied, 1, pBlob->GetBufferPointer(), pBlob->GetBufferSize(), pInputLayout.GetAddressOf());
+        {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+    pDevice->CreateInputLayout(ied, std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(),
+                               pInputLayout.GetAddressOf());
     pCtx->IASetInputLayout(pInputLayout.Get());
 
     pCtx->IASetInputLayout(pInputLayout.Get());

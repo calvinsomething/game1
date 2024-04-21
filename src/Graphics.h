@@ -25,7 +25,7 @@ class Graphics
     Graphics(const Graphics &) = delete;
     Graphics &operator=(const Graphics &) = delete;
 
-    void Clear(Color color);
+    void Clear(Color<float> color);
     void EndFrame();
     void DrawTriangle();
 };

@@ -80,9 +80,9 @@ Graphics::~Graphics()
 {
 }
 
-void Graphics::Clear(Color color)
+void Graphics::Clear(Color<float> color)
 {
-    color.alpha = 1;
+    color.a = 1;
     pCtx->ClearRenderTargetView(pTarget.Get(), reinterpret_cast<float *>(&color));
 }
 
@@ -97,11 +97,14 @@ void Graphics::DrawTriangle()
 
     pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    Vertex vertices[] = {{{0.0f, 0.5f, 0.0f, 1.0f}, {255, 0, 0, 255}},
-                         {{0.5f, -0.5f, 0.0f, 1.0f}, {0, 255, 0, 255}},
-                         {{-0.5f, -0.5f, 0.0f, 1.0f}, {0, 0, 255, 255}}};
+    Vec4 vertices[] = {
+        {-0.5f, 0.5f, 0.0f, 1.0f},
+        {0.5f, 0.5f, 0.0f, 1.0f},
+        {0.5f, -0.5f, 0.0f, 1.0f},
+        {-0.5f, -0.5f, 0.0f, 1.0f},
+    };
 
-    unsigned indices[] = {0, 1, 2};
+    unsigned indices[] = {0, 1, 2, 2, 3, 0};
 
     D3D11_BUFFER_DESC bd{};
     D3D11_SUBRESOURCE_DATA sd{};
@@ -112,7 +115,7 @@ void Graphics::DrawTriangle()
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     bd.MiscFlags = 0;
-    bd.StructureByteStride = sizeof(unsigned);
+    bd.StructureByteStride = sizeof(indices[0]);
 
     sd.pSysMem = indices;
 
@@ -124,15 +127,16 @@ void Graphics::DrawTriangle()
     bd.ByteWidth = sizeof(vertices);
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.StructureByteStride = sizeof(Vertex);
+    bd.StructureByteStride = sizeof(vertices[0]);
 
     sd.pSysMem = vertices;
 
     THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pVertexBuffer.GetAddressOf()));
 
-    unsigned stride = sizeof(Vertex), offset = 0;
+    unsigned stride = sizeof(Vec4), offset = 0;
     pCtx->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
 
+    // vertex shader
     ComPtr<ID3DBlob> pBlob;
 
     ComPtr<ID3D11VertexShader> pVertexShader;
@@ -144,13 +148,12 @@ void Graphics::DrawTriangle()
     ComPtr<ID3D11InputLayout> pInputLayout;
     D3D11_INPUT_ELEMENT_DESC ied[] = {
         {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"Color", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
     pDevice->CreateInputLayout(ied, std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(),
                                pInputLayout.GetAddressOf());
     pCtx->IASetInputLayout(pInputLayout.Get());
 
-    pCtx->IASetInputLayout(pInputLayout.Get());
+    // pixel shader
     ComPtr<ID3D11PixelShader> pPixelShader;
     THROW_IF_FAILED(D3DReadFileToBlob(L"shaders/pixel.cso", pBlob.ReleaseAndGetAddressOf()));
     THROW_IF_FAILED(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr,

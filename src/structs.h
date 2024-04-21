@@ -1,27 +1,22 @@
 #pragma once
 
-struct Color
+template <typename T> struct Color
 {
-    float red;
-    float green;
-    float blue;
-    float alpha;
+    T r;
+    T g;
+    T b;
+    T a;
 };
 
-struct Vertex
+struct Vec4
 {
-    struct
-    {
-        float x;
-        float y;
-        float z;
-        float w;
-    } pos;
-    struct
-    {
-        unsigned char r;
-        unsigned char g;
-        unsigned char b;
-        unsigned char a;
-    } color;
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+template <unsigned N, unsigned M> struct Matrix
+{
+    float elements[N][M];
 };

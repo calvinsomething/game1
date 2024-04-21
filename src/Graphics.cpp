@@ -34,6 +34,8 @@
 
 #endif
 
+namespace dx = DirectX;
+
 // Graphics
 Graphics::Graphics(HWND hWnd)
 {
@@ -91,7 +93,7 @@ void Graphics::EndFrame()
     THROW_IF_DEVICE_REMOVED(pSwapChain->Present(1, 0));
 }
 
-void Graphics::DrawTriangle()
+void Graphics::DrawCube()
 {
     using namespace Microsoft::WRL;
 
@@ -152,6 +154,21 @@ void Graphics::DrawTriangle()
     pDevice->CreateInputLayout(ied, std::size(ied), pBlob->GetBufferPointer(), pBlob->GetBufferSize(),
                                pInputLayout.GetAddressOf());
     pCtx->IASetInputLayout(pInputLayout.Get());
+
+    // vs constant buffer
+    dx::XMMATRIX transform = dx::XMMatrixMultiplyTranspose(dx::XMMatrixRotationZ(0.1), dx::XMMatrixScaling(0.75, 1, 1));
+    bd = {};
+    bd.ByteWidth = sizeof(transform);
+    bd.Usage = D3D11_USAGE_DYNAMIC;
+    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    sd.pSysMem = &transform;
+
+    ComPtr<ID3D11Buffer> pConstantBuffer;
+    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pConstantBuffer.GetAddressOf()));
+
+    pCtx->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
     // pixel shader
     ComPtr<ID3D11PixelShader> pPixelShader;

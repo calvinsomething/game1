@@ -27,5 +27,5 @@ class Graphics
 
     void Clear(Color<float> color);
     void EndFrame();
-    void DrawTriangle();
+    void DrawCube();
 };

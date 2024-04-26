@@ -100,13 +100,12 @@ void Graphics::DrawCube()
     pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     Vec4 vertices[] = {
-        {-0.5f, 0.5f, 0.0f, 1.0f},
-        {0.5f, 0.5f, 0.0f, 1.0f},
-        {0.5f, -0.5f, 0.0f, 1.0f},
-        {-0.5f, -0.5f, 0.0f, 1.0f},
+        {-1, 1, -1, 1}, {1, 1, -1, 1}, {1, -1, -1, 1}, {-1, -1, -1, 1},
+        {-1, 1, 1, 1},  {1, 1, 1, 1},  {1, -1, 1, 1},  {-1, -1, 1, 1},
     };
 
-    unsigned indices[] = {0, 1, 2, 2, 3, 0};
+    unsigned indices[] = {5, 4, 7, 7, 6, 5, 4, 5, 1, 1, 0, 4, 1, 5, 6, 6, 2, 1,
+                          4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 0, 1, 2, 2, 3, 0};
 
     D3D11_BUFFER_DESC bd{};
     D3D11_SUBRESOURCE_DATA sd{};
@@ -147,6 +146,7 @@ void Graphics::DrawCube()
                                                 pVertexShader.GetAddressOf()));
     pCtx->VSSetShader(pVertexShader.Get(), nullptr, 0);
 
+    // vertex buffer input layout
     ComPtr<ID3D11InputLayout> pInputLayout;
     D3D11_INPUT_ELEMENT_DESC ied[] = {
         {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -156,7 +156,9 @@ void Graphics::DrawCube()
     pCtx->IASetInputLayout(pInputLayout.Get());
 
     // vs constant buffer
-    dx::XMMATRIX transform = dx::XMMatrixMultiplyTranspose(dx::XMMatrixRotationZ(0.1), dx::XMMatrixScaling(0.75, 1, 1));
+    dx::XMMATRIX transform = dx::XMMatrixMultiplyTranspose(
+        dx::XMMatrixRotationX(0.3) * dx::XMMatrixRotationY(0.5),
+        dx::XMMatrixScaling(0.75, 1, 1) * dx::XMMatrixTranslation(0, 0, 7) * dx::XMMatrixPerspectiveLH(1, 0.75, 1, 10));
     bd = {};
     bd.ByteWidth = sizeof(transform);
     bd.Usage = D3D11_USAGE_DYNAMIC;
@@ -176,6 +178,21 @@ void Graphics::DrawCube()
     THROW_IF_FAILED(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr,
                                                pPixelShader.GetAddressOf()));
     pCtx->PSSetShader(pPixelShader.Get(), nullptr, 0);
+
+    // ps constant buffer
+    Color<float> face_colors[] = {
+        {1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 0}, {1, 1, 0}, {0, 1, 1},
+    };
+    bd = {};
+    bd.ByteWidth = sizeof(face_colors);
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+    sd.pSysMem = face_colors;
+
+    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pConstantBuffer.ReleaseAndGetAddressOf()));
+
+    pCtx->PSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
     pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
 

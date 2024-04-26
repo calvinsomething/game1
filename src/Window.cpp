@@ -28,8 +28,8 @@ Window::Window(const char *className, unsigned long windowExStyle, unsigned long
 
     THROW_IF_FALSE(RegisterClassA(&wc));
 
-    hWnd = CreateWindowExA(windowExStyle, className, className, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
-                           CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, wc.hInstance, nullptr);
+    hWnd = CreateWindowExA(windowExStyle, className, className, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, 820, 620,
+                           nullptr, nullptr, wc.hInstance, nullptr);
     THROW_IF_FALSE(hWnd);
 }
 

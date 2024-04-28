@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 add_executable(${PROJECT_NAME} WIN32
 	src/main.cpp
 
+	src/ConstantBuffer.cpp
 	src/Exception.cpp
 	src/GfxDebug.cpp
 	src/Graphics.cpp

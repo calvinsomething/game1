@@ -125,7 +125,7 @@ void Graphics::DrawCube()
         {1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 0}, {1, 1, 0}, {0, 1, 1},
     };
 
-    ConstantBuffer<D3D11_USAGE_DYNAMIC> psColors = {*this, &face_colors, sizeof(face_colors)};
+    ConstantBuffer<D3D11_USAGE_DEFAULT> psColors = {*this, &face_colors, sizeof(face_colors)};
     ID3D11Buffer *ps_c_buffers[] = {psColors.get_dx_addr()};
     pCtx->PSSetConstantBuffers(0, 1, ps_c_buffers);
 

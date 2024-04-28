@@ -1,38 +1,9 @@
 #include "Graphics.h"
 
+#include "ConstantBuffer.h"
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
 #include "Window.h"
-
-// Exception Handling
-#define THROW_IF_DEVICE_REMOVED(fn)                                                                                    \
-    {                                                                                                                  \
-        HRESULT hr = fn;                                                                                               \
-        if (FAILED(hr))                                                                                                \
-        {                                                                                                              \
-            if (hr == DXGI_ERROR_DEVICE_REMOVED)                                                                       \
-            {                                                                                                          \
-                hr = pDevice->GetDeviceRemovedReason();                                                                \
-            }                                                                                                          \
-            throw get_windows_exception(hr, __FILE__, __LINE__);                                                       \
-        }                                                                                                              \
-    }
-
-#ifdef NDEBUG
-#define CHECK_ERRORS()
-
-#else
-#undef THROW_IF_FAILED
-#define THROW_IF_FAILED(fn)                                                                                            \
-    {                                                                                                                  \
-        debug.SetIndex();                                                                                              \
-        HRESULT hr = fn;                                                                                               \
-        if (FAILED(hr))                                                                                                \
-        {                                                                                                              \
-            throw debug.GetException(hr, __FILE__, __LINE__);                                                          \
-        }                                                                                                              \
-    }
-#define CHECK_ERRORS() debug.CheckErrors(__FILE__, __LINE__)
-
-#endif
 
 namespace dx = DirectX;
 
@@ -107,35 +78,13 @@ void Graphics::DrawCube()
     unsigned indices[] = {5, 4, 7, 7, 6, 5, 4, 5, 1, 1, 0, 4, 1, 5, 6, 6, 2, 1,
                           4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 0, 1, 2, 2, 3, 0};
 
-    D3D11_BUFFER_DESC bd{};
-    D3D11_SUBRESOURCE_DATA sd{};
+    IndexBuffer ib{*this, indices, sizeof(indices)};
+    pCtx->IASetIndexBuffer(ib.get_dx_addr(), DXGI_FORMAT_R32_UINT, 0);
 
-    // bind index buffer
-    ComPtr<ID3D11Buffer> pIndexBuffer;
-    bd.ByteWidth = sizeof(indices);
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.MiscFlags = 0;
-    bd.StructureByteStride = sizeof(indices[0]);
-
-    sd.pSysMem = indices;
-
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pIndexBuffer.GetAddressOf()));
-    pCtx->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-    // bind vertex buffer
-    ComPtr<ID3D11Buffer> pVertexBuffer;
-    bd.ByteWidth = sizeof(vertices);
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.StructureByteStride = sizeof(vertices[0]);
-
-    sd.pSysMem = vertices;
-
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pVertexBuffer.GetAddressOf()));
-
-    unsigned stride = sizeof(Vec4), offset = 0;
-    pCtx->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+    VertexBuffer vb{*this, vertices, sizeof(vertices)};
+    unsigned stride = sizeof(vertices[0]), offset = 0;
+    ID3D11Buffer *vertex_buffers[] = {vb.get_dx_addr()};
+    pCtx->IASetVertexBuffers(0, 1, vertex_buffers, &stride, &offset);
 
     // vertex shader
     ComPtr<ID3DBlob> pBlob;
@@ -156,21 +105,13 @@ void Graphics::DrawCube()
     pCtx->IASetInputLayout(pInputLayout.Get());
 
     // vs constant buffer
-    dx::XMMATRIX transform = dx::XMMatrixMultiplyTranspose(
-        dx::XMMatrixRotationX(0.3) * dx::XMMatrixRotationY(0.5),
-        dx::XMMatrixScaling(0.75, 1, 1) * dx::XMMatrixTranslation(0, 0, 7) * dx::XMMatrixPerspectiveLH(1, 0.75, 1, 10));
-    bd = {};
-    bd.ByteWidth = sizeof(transform);
-    bd.Usage = D3D11_USAGE_DYNAMIC;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    dx::XMMATRIX transform =
+        dx::XMMatrixMultiplyTranspose(dx::XMMatrixRotationX(0.3) * dx::XMMatrixRotationY(0.5),
+                                      dx::XMMatrixTranslation(0, 0, 7) * dx::XMMatrixPerspectiveLH(1, 0.75, 1, 10));
 
-    sd.pSysMem = &transform;
-
-    ComPtr<ID3D11Buffer> pConstantBuffer;
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pConstantBuffer.GetAddressOf()));
-
-    pCtx->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+    ConstantBuffer<D3D11_USAGE_DYNAMIC> vsTransform = {*this, &transform, sizeof(transform)};
+    ID3D11Buffer *vs_c_buffers[] = {vsTransform.get_dx_addr()};
+    pCtx->VSSetConstantBuffers(0, 1, vs_c_buffers);
 
     // pixel shader
     ComPtr<ID3D11PixelShader> pPixelShader;
@@ -183,16 +124,10 @@ void Graphics::DrawCube()
     Color<float> face_colors[] = {
         {1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 0}, {1, 1, 0}, {0, 1, 1},
     };
-    bd = {};
-    bd.ByteWidth = sizeof(face_colors);
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
-    sd.pSysMem = face_colors;
-
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pConstantBuffer.ReleaseAndGetAddressOf()));
-
-    pCtx->PSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+    ConstantBuffer<D3D11_USAGE_DYNAMIC> psColors = {*this, &face_colors, sizeof(face_colors)};
+    ID3D11Buffer *ps_c_buffers[] = {psColors.get_dx_addr()};
+    pCtx->PSSetConstantBuffers(0, 1, ps_c_buffers);
 
     pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
 

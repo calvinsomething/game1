@@ -11,6 +11,7 @@
 class Graphics
 {
     friend class Buffer;
+    friend class Shader;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
     Microsoft::WRL::ComPtr<ID3D11Device> pDevice;

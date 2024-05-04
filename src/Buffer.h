@@ -13,7 +13,7 @@ class Buffer
 #endif
               {};
 
-    ID3D11Buffer *get_dx_addr()
+    ID3D11Buffer *GetDxBuffer()
     {
         return pBuffer.Get();
     }

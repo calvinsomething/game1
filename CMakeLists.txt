@@ -12,7 +12,10 @@ add_executable(${PROJECT_NAME} WIN32
 	src/Graphics.cpp
 	src/IndexBuffer.cpp
 	src/MainWindow.cpp
+	src/PixelShader.cpp
+	src/Shader.cpp
 	src/VertexBuffer.cpp
+	src/VertexShader.cpp
 	src/Window.cpp
 
 	src/resources.rc)

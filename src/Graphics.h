@@ -11,6 +11,7 @@
 class Graphics
 {
     friend class Buffer;
+    friend class Cube;
     friend class Shader;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
@@ -30,7 +31,6 @@ class Graphics
 
     void Clear(Color<float> color);
     void EndFrame();
-    void DrawCube();
 };
 
 // Exception Handling

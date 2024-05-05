@@ -2,7 +2,7 @@
 
 using namespace Microsoft::WRL;
 
-IndexBuffer::IndexBuffer(Graphics &gfx, unsigned *indices, unsigned byte_width) : Buffer(gfx)
+IndexBuffer::IndexBuffer(Graphics &gfx, const unsigned *indices, unsigned byte_width) : Buffer(gfx)
 {
     D3D11_BUFFER_DESC bd{};
     bd.ByteWidth = byte_width;

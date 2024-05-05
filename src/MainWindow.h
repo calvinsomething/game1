@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cube.h"
 #include "Graphics.h"
 #include "Window.h"
 
@@ -7,6 +8,7 @@ class MainWindow : public Window
 {
     static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     std::unique_ptr<Graphics> pGfx;
+    std::unique_ptr<Cube> cube;
 
   public:
     MainWindow();
@@ -18,7 +20,7 @@ class MainWindow : public Window
     void RenderFrame()
     {
         pGfx->Clear({0.2f, 1.0f, 0.3f});
-        pGfx->DrawCube();
+        cube->Draw();
         pGfx->EndFrame();
     }
 };

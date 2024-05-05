@@ -7,6 +7,7 @@ add_executable(${PROJECT_NAME} WIN32
 	src/main.cpp
 
 	src/ConstantBuffer.cpp
+	src/Cube.cpp
 	src/Exception.cpp
 	src/GfxDebug.cpp
 	src/Graphics.cpp

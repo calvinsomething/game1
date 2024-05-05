@@ -52,6 +52,19 @@ Graphics::Graphics(HWND hWnd)
 
     Shader::pDevice = pDevice.Get();
     Shader::pCtx = pCtx.Get();
+
+    // set render target
+    pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
+
+    // set viewport
+    D3D11_VIEWPORT vp;
+    vp.Width = 800;
+    vp.Height = 600;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    vp.MinDepth = 0;
+    vp.MaxDepth = 1;
+    pCtx->RSSetViewports(1, &vp);
 }
 
 Graphics::~Graphics()
@@ -67,74 +80,4 @@ void Graphics::Clear(Color<float> color)
 void Graphics::EndFrame()
 {
     THROW_IF_DEVICE_REMOVED(pSwapChain->Present(1, 0));
-}
-
-void Graphics::DrawCube()
-{
-    using namespace Microsoft::WRL;
-
-    pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    Vec4 vertices[] = {
-        {-1, 1, -1, 1}, {1, 1, -1, 1}, {1, -1, -1, 1}, {-1, -1, -1, 1},
-        {-1, 1, 1, 1},  {1, 1, 1, 1},  {1, -1, 1, 1},  {-1, -1, 1, 1},
-    };
-
-    unsigned indices[] = {5, 4, 7, 7, 6, 5, 4, 5, 1, 1, 0, 4, 1, 5, 6, 6, 2, 1,
-                          4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 0, 1, 2, 2, 3, 0};
-
-    IndexBuffer ib{*this, indices, sizeof(indices)};
-    pCtx->IASetIndexBuffer(ib.GetDxBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-    VertexBuffer vb{*this, vertices, sizeof(vertices)};
-    unsigned stride = sizeof(vertices[0]), offset = 0;
-    ID3D11Buffer *vertex_buffers[] = {vb.GetDxBuffer()};
-    pCtx->IASetVertexBuffers(0, 1, vertex_buffers, &stride, &offset);
-
-    VertexShader vs{*this, L"shaders/vertex.cso"};
-    vs.Bind();
-
-    // vertex buffer input layout
-    ComPtr<ID3D11InputLayout> pInputLayout;
-    D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-    pDevice->CreateInputLayout(ied, std::size(ied), vs.GetByteCode(), vs.GetByteCodeSize(),
-                               pInputLayout.GetAddressOf());
-    pCtx->IASetInputLayout(pInputLayout.Get());
-
-    // vs constant buffer
-    dx::XMMATRIX transform =
-        dx::XMMatrixMultiplyTranspose(dx::XMMatrixRotationX(0.3) * dx::XMMatrixRotationY(0.5),
-                                      dx::XMMatrixTranslation(0, 0, 7) * dx::XMMatrixPerspectiveLH(1, 0.75, 1, 10));
-
-    ConstantBuffer<D3D11_USAGE_DYNAMIC> vsTransform = {*this, &transform, sizeof(transform)};
-    ID3D11Buffer *vs_c_buffers[] = {vsTransform.GetDxBuffer()};
-    pCtx->VSSetConstantBuffers(0, 1, vs_c_buffers);
-
-    PixelShader ps{*this, L"shaders/pixel.cso"};
-    ps.Bind();
-
-    // ps constant buffer
-    Color<float> face_colors[] = {
-        {1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 0}, {1, 1, 0}, {0, 1, 1},
-    };
-
-    ConstantBuffer<D3D11_USAGE_DEFAULT> psColors = {*this, &face_colors, sizeof(face_colors)};
-    ID3D11Buffer *ps_c_buffers[] = {psColors.GetDxBuffer()};
-    pCtx->PSSetConstantBuffers(0, 1, ps_c_buffers);
-
-    pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
-
-    D3D11_VIEWPORT vp;
-    vp.Width = 800;
-    vp.Height = 600;
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    vp.MinDepth = 0;
-    vp.MaxDepth = 1;
-    pCtx->RSSetViewports(1, &vp);
-
-    pCtx->DrawIndexed(std::size(indices), 0, 0);
-    CHECK_ERRORS();
 }

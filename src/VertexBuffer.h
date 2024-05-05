@@ -5,5 +5,5 @@
 class VertexBuffer : public Buffer
 {
   public:
-    VertexBuffer(Graphics &gfx, Vec4 *vertices, unsigned byte_width);
+    VertexBuffer(Graphics &gfx, const Vec4 *vertices, unsigned byte_width);
 };

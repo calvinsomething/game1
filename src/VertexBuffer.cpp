@@ -2,7 +2,7 @@
 
 using namespace Microsoft::WRL;
 
-VertexBuffer::VertexBuffer(Graphics &gfx, Vec4 *vertices, unsigned byte_width) : Buffer(gfx)
+VertexBuffer::VertexBuffer(Graphics &gfx, const Vec4 *vertices, unsigned byte_width) : Buffer(gfx)
 {
     D3D11_BUFFER_DESC bd{};
     bd.ByteWidth = byte_width;

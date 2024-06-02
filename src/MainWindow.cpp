@@ -19,9 +19,23 @@ MainWindow::MainWindow()
              "world_icon")
 {
     pGfx = std::make_unique<Graphics>(hWnd);
-    cube = std::make_unique<Cube>(*(pGfx.get()));
+
+    cubes.reserve(1);
+    cubes.push_back(std::make_unique<Cube>());
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::RenderFrame()
+{
+    pGfx->Clear({0.2f, 1.0f, 0.3f});
+
+    for (auto &c : cubes)
+    {
+        c->Draw();
+    }
+
+    pGfx->EndFrame();
 }

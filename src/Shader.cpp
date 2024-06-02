@@ -1,23 +1,18 @@
 #include "Shader.h"
 
-// Static Definitions
-ID3D11Device *Shader::pDevice;
-ID3D11DeviceContext *Shader::pCtx;
-
-Shader::Shader(Graphics &gfx, const wchar_t *file_name)
-#ifndef NDEBUG
-    : debug(gfx.debug)
-#endif
+Shader::Shader(const wchar_t *file_name)
 {
     THROW_IF_FAILED(D3DReadFileToBlob(file_name, pByteCode.GetAddressOf()));
 };
 
-const void *Shader::GetByteCode()
+Shader::Shader(const wchar_t *file_name, std::vector<ConstantBuffer> &&constant_buffers)
+    : constant_buffers(std::move(constant_buffers))
 {
-    return pByteCode->GetBufferPointer();
-}
+    THROW_IF_FAILED(D3DReadFileToBlob(file_name, pByteCode.GetAddressOf()));
 
-unsigned long long Shader::GetByteCodeSize()
-{
-    return pByteCode->GetBufferSize();
-}
+    dx_constant_buffers.reserve(this->constant_buffers.size());
+    for (auto &cb : this->constant_buffers)
+    {
+        dx_constant_buffers.push_back(cb.GetBuffer());
+    }
+};

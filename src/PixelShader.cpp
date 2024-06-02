@@ -1,13 +1,23 @@
 #include "PixelShader.h"
 
-PixelShader::PixelShader(Graphics &gfx, const wchar_t *file_name) : Shader(gfx, file_name)
+PixelShader::PixelShader(const wchar_t *file_name) : Shader(file_name)
 {
-    THROW_IF_FAILED(
-        Shader::pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
-                                           reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
+    THROW_IF_FAILED(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
+                                               reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
 }
+
+PixelShader::PixelShader(const wchar_t *file_name, std::vector<ConstantBuffer> &&constant_buffers)
+    : Shader(file_name, std::move(constant_buffers))
+{
+    THROW_IF_FAILED(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
+                                               reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
+};
 
 void PixelShader::Bind()
 {
-    Shader::pCtx->PSSetShader(reinterpret_cast<ID3D11PixelShader *>(pDxShader.Get()), nullptr, 0);
+    pCtx->PSSetShader(reinterpret_cast<ID3D11PixelShader *>(pDxShader.Get()), nullptr, 0);
+    CHECK_ERRORS();
+
+    pCtx->PSSetConstantBuffers(0, dx_constant_buffers.size(), dx_constant_buffers.data());
+    CHECK_ERRORS();
 }

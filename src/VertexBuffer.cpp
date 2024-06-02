@@ -1,17 +1,42 @@
 #include "VertexBuffer.h"
 
-using namespace Microsoft::WRL;
-
-VertexBuffer::VertexBuffer(Graphics &gfx, const Vec4 *vertices, unsigned byte_width) : Buffer(gfx)
+VertexBuffers::VertexBuffers(std::initializer_list<VertexBufferBase *> vertex_buffers)
 {
-    D3D11_BUFFER_DESC bd{};
-    bd.ByteWidth = byte_width;
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.StructureByteStride = sizeof(vertices[0]);
+    Set(vertex_buffers);
+}
 
-    D3D11_SUBRESOURCE_DATA sd{};
-    sd.pSysMem = vertices;
+void VertexBuffers::Set(std::initializer_list<VertexBufferBase *> input)
+{
+    unsigned n = input.size();
 
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
+    vertex_buffers.clear();
+    vertex_buffers.reserve(n);
+    strides.clear();
+    strides.reserve(n);
+    offsets.clear();
+    offsets.reserve(n);
+
+    for (VertexBufferBase *b : input)
+    {
+        vertex_buffers.push_back(b->pBuffer.Get());
+        strides.push_back(b->stride);
+        offsets.push_back(b->offset);
+    }
+}
+
+VertexBufferBase::VertexBufferBase(size_t stride) : stride(stride), offset(0)
+{
+}
+
+void VertexBufferBase::Bind()
+{
+    pCtx->IASetVertexBuffers(0, 1, pBuffer.GetAddressOf(), &stride, &offset);
+    CHECK_ERRORS();
+}
+
+void VertexBuffers::Bind()
+{
+    assert(initialized && "attempt to bind uninitialized VertexBuffers");
+    pCtx->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), strides.data(), offsets.data());
+    CHECK_ERRORS();
 }

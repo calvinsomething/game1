@@ -1,9 +1,19 @@
 #include "IndexBuffer.h"
 
-using namespace Microsoft::WRL;
-
-IndexBuffer::IndexBuffer(Graphics &gfx, const unsigned *indices, unsigned byte_width) : Buffer(gfx)
+IndexBuffer::IndexBuffer() : initialized(false)
 {
+}
+
+IndexBuffer::IndexBuffer(const unsigned *indices, size_t byte_width) : initialized(false)
+{
+    Init(indices, byte_width);
+}
+
+void IndexBuffer::Init(const unsigned *indices, size_t byte_width)
+{
+    assert(!initialized);
+    initialized = true;
+
     D3D11_BUFFER_DESC bd{};
     bd.ByteWidth = byte_width;
     bd.Usage = D3D11_USAGE_DEFAULT;
@@ -14,4 +24,10 @@ IndexBuffer::IndexBuffer(Graphics &gfx, const unsigned *indices, unsigned byte_w
     sd.pSysMem = indices;
 
     THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
+}
+
+void IndexBuffer::Bind()
+{
+    assert(initialized && "attempt to bind uninitialized IndexBuffer");
+    pCtx->IASetIndexBuffer(pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 }

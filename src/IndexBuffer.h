@@ -2,8 +2,16 @@
 
 #include "Buffer.h"
 
+#include "pch.h"
+
 class IndexBuffer : public Buffer
 {
+    bool initialized;
+
   public:
-    IndexBuffer(Graphics &gfx, const unsigned *indices, unsigned byte_width);
+    IndexBuffer();
+    IndexBuffer(const unsigned *indices, size_t byte_width);
+    void Init(const unsigned *indices, size_t byte_width);
+
+    void Bind() override;
 };

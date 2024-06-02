@@ -1,29 +1,26 @@
 #pragma once
 
-#include "pch.h"
+#include "interfaces.h"
 
-#include "GfxDebug.h"
-#include "Graphics.h"
+#include "ConstantBuffer.h"
 
-class Shader
+class Shader : public Bindable
 {
-    friend class Graphics;
-
   protected:
     Microsoft::WRL::ComPtr<ID3DBlob> pByteCode;
     Microsoft::WRL::ComPtr<IUnknown> pDxShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 
-    static ID3D11Device *pDevice;
-    static ID3D11DeviceContext *pCtx;
-#ifndef NDEBUG
-    GfxDebug &debug;
-#endif
   public:
-    Shader(Graphics &gfx, const wchar_t *file_name);
-    // virtual ~Shader() = default;
+    Shader(const wchar_t *file_name);
+    Shader(const wchar_t *file_name, std::vector<ConstantBuffer> &&constant_buffers);
 
-    virtual void Bind() = 0;
+    template <size_t N> void SetInputLayout(D3D11_INPUT_ELEMENT_DESC (&&ied)[N])
+    {
+        THROW_IF_FAILED(pDevice->CreateInputLayout(ied, N, pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(),
+                                                   pInputLayout.GetAddressOf()));
+    }
 
-    const void *GetByteCode();
-    unsigned long long GetByteCodeSize();
+    std::vector<ConstantBuffer> constant_buffers;
+    std::vector<ID3D11Buffer *> dx_constant_buffers;
 };

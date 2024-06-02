@@ -1,59 +1,62 @@
 #include "Cube.h"
 
+#include "IndexBuffer.h"
+#include "PixelShader.h"
+#include "VertexBuffer.h"
+#include "VertexShader.h"
+
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-Cube::Cube(Graphics &gfx)
-    : pDevice(gfx.pDevice.Get()), pCtx(gfx.pCtx.Get()), ib{gfx, indices, sizeof(indices)},
-      vb{gfx, vertices, sizeof(vertices)}, vs{gfx, L"shaders/vertex.cso"}, vsTransform(gfx),
-      ps{gfx, L"shaders/pixel.cso"}, psColors(gfx)
-#ifndef NDEBUG
-      ,
-      debug(gfx.debug)
-#endif
+bool Cube::initialized = false;
+
+std::vector<std::unique_ptr<Buffer>> Cube::buffers;
+std::vector<std::unique_ptr<Shader>> Cube::shaders;
+
+Cube::Cube()
 {
-    // vertex buffer input layout
-    D3D11_INPUT_ELEMENT_DESC ied[] = {
-        {"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-    pDevice->CreateInputLayout(ied, std::size(ied), vs.GetByteCode(), vs.GetByteCodeSize(),
-                               pInputLayout.GetAddressOf());
+    if (!initialized)
+    {
+        buffers.reserve(2);
+        buffers.push_back(std::make_unique<VertexBuffer<XMVECTOR>>(vertices, sizeof(vertices)));
+        buffers.push_back(std::make_unique<IndexBuffer>(indices, sizeof(indices)));
 
-    // vs constant buffer
-    XMMATRIX transform =
-        XMMatrixMultiplyTranspose(XMMatrixRotationX(0.3) * XMMatrixRotationY(0.5),
-                                  XMMatrixTranslation(0, 0, 7) * XMMatrixPerspectiveLH(1, 0.75, 1, 10));
-    vsTransform.Init(&transform, sizeof(transform));
+        shaders.reserve(2);
 
-    // ps constant buffer
-    Color<float> face_colors[] = {
-        {1, 0, 0}, {1, 1, 0}, {1, 0, 1}, {0, 1, 0}, {1, 1, 0}, {0, 1, 1},
-    };
-    psColors.Init(&face_colors, sizeof(face_colors));
+        // VS
+        shaders.push_back(
+            std::make_unique<VertexShader>(L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform)}));
+        shaders[0]->SetInputLayout(
+            {{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}});
 
-    vertex_buffers[0] = vb.GetDxBuffer();
-    vs_c_buffers[0] = vsTransform.GetDxBuffer();
-    ps_c_buffers[0] = psColors.GetDxBuffer();
+        // PS
+        shaders.push_back(
+            std::make_unique<PixelShader>(L"shaders/pixel.cso", std::vector<ConstantBuffer>{{face_colors}}));
+
+        initialized = true;
+    }
 }
 
 void Cube::Draw()
 {
+    assert(initialized && "Draw called on uninitialized Cube.");
+
+    transform = XMMatrixMultiplyTranspose(XMMatrixRotationX(0.9) * XMMatrixRotationY(0.5),
+                                          XMMatrixTranslation(0, 0, 7) * XMMatrixPerspectiveLH(1, 0.75, 1, 10));
+
+    shaders[0]->constant_buffers[0].Update(transform);
+
+    for (auto &s : shaders)
+    {
+        s->Bind();
+    }
+    for (auto &b : buffers)
+    {
+        b->Bind();
+    }
+
     pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    unsigned stride = sizeof(vertices[0]), offset = 0;
-    pCtx->IASetVertexBuffers(0, 1, vertex_buffers, &stride, &offset);
-
-    pCtx->IASetIndexBuffer(ib.GetDxBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-    vs.Bind();
-
-    pCtx->IASetInputLayout(pInputLayout.Get());
-
-    pCtx->VSSetConstantBuffers(0, 1, vs_c_buffers);
-
-    ps.Bind();
-
-    pCtx->PSSetConstantBuffers(0, 1, ps_c_buffers);
+    CHECK_ERRORS();
 
     pCtx->DrawIndexed(std::size(indices), 0, 0);
     CHECK_ERRORS();

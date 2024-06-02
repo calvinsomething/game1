@@ -10,6 +10,7 @@
 #include <wrl.h>
 
 // STD
+#include <cassert>
 #include <exception>
 #include <iterator>
 #include <memory>

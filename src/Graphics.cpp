@@ -1,16 +1,15 @@
 #include "Graphics.h"
 
-#include "ConstantBuffer.h"
-#include "IndexBuffer.h"
-#include "PixelShader.h"
-#include "VertexBuffer.h"
-#include "VertexShader.h"
 #include "Window.h"
 
 namespace dx = DirectX;
 
+// Static definitions
+ID3D11Device *GfxAccess::pDevice = nullptr;
+ID3D11DeviceContext *GfxAccess::pCtx = nullptr;
+
 // Graphics
-Graphics::Graphics(HWND hWnd)
+Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.75, 1, 50))
 {
     using namespace Microsoft::WRL;
 
@@ -50,8 +49,8 @@ Graphics::Graphics(HWND hWnd)
 
     THROW_IF_FAILED(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));
 
-    Shader::pDevice = pDevice.Get();
-    Shader::pCtx = pCtx.Get();
+    GfxAccess::pDevice = pDevice.Get();
+    GfxAccess::pCtx = pCtx.Get();
 
     // set render target
     pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);

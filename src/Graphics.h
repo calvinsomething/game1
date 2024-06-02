@@ -6,28 +6,32 @@
 
 #ifndef NDEBUG
 #include "GfxDebug.h"
+extern GfxDebug gfxDebug;
 #endif
+
+class GfxAccess
+{
+    friend class Graphics;
+
+  protected:
+    static ID3D11Device *pDevice;
+    static ID3D11DeviceContext *pCtx;
+};
 
 class Graphics
 {
-    friend class Buffer;
-    friend class Cube;
-    friend class Shader;
-
     Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
     Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> pCtx;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
-
-#ifndef NDEBUG
-    GfxDebug debug;
-#endif
 
   public:
     Graphics(HWND hWnd);
     ~Graphics();
     Graphics(const Graphics &) = delete;
     Graphics &operator=(const Graphics &) = delete;
+
+    DirectX::XMMATRIX ProjectionMatrix;
 
     void Clear(Color<float> color);
     void EndFrame();
@@ -56,13 +60,13 @@ class Graphics
 #undef THROW_IF_FAILED
 #define THROW_IF_FAILED(fn)                                                                                            \
     {                                                                                                                  \
-        debug.SetIndex();                                                                                              \
+        gfxDebug.SetIndex();                                                                                           \
         HRESULT hr = fn;                                                                                               \
         if (FAILED(hr))                                                                                                \
         {                                                                                                              \
-            throw debug.GetException(hr, __FILE__, __LINE__);                                                          \
+            throw gfxDebug.GetException(hr, __FILE__, __LINE__);                                                       \
         }                                                                                                              \
     }
-#define CHECK_ERRORS() debug.CheckErrors(__FILE__, __LINE__)
+#define CHECK_ERRORS() gfxDebug.CheckErrors(__FILE__, __LINE__)
 
 #endif

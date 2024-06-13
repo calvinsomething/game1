@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include "utils.h"
+
 // Static
 LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -20,8 +22,22 @@ MainWindow::MainWindow()
 {
     pGfx = std::make_unique<Graphics>(hWnd);
 
-    cubes.reserve(1);
-    cubes.push_back(std::make_unique<Cube>());
+	auto& rfg = RFG::Get();
+
+	const unsigned cubesCt = 20;
+
+    cubes.reserve(cubesCt);
+	for (int i = 0; i < cubesCt; i++)
+	{
+		cubes.push_back(std::make_unique<Cube>(rfg(3, 20), {
+			rfg(0, 1),
+			rfg(0, 1),
+			rfg(0, 1),
+			rfg(0, 1),
+			rfg(0, 1),
+			rfg(0, 1),
+		}));
+	}
 }
 
 MainWindow::~MainWindow()
@@ -34,6 +50,7 @@ void MainWindow::RenderFrame()
 
     for (auto &c : cubes)
     {
+        c->Update();
         c->Draw();
     }
 

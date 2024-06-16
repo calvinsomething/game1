@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME} WIN32
 	src/MainWindow.cpp
 	src/PixelShader.cpp
 	src/Shader.cpp
+	src/utils.cpp
 	src/VertexBuffer.cpp
 	src/VertexShader.cpp
 	src/Window.cpp

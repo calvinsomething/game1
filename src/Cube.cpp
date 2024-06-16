@@ -13,7 +13,8 @@ bool Cube::initialized = false;
 std::vector<std::unique_ptr<Buffer>> Cube::buffers;
 std::vector<std::unique_ptr<Shader>> Cube::shaders;
 
-Cube::Cube(float radius, decltype(deltas) deltas) : radius(radius), deltas(deltas)
+Cube::Cube(float radius, decltype(deltas) deltas)
+    : radius(radius), deltas(deltas), roll(), pitch(), yaw(), theta(), phi(), chi()
 {
     if (!initialized)
     {
@@ -41,15 +42,17 @@ void Cube::Update(float dtime)
 {
     assert(initialized && "Draw called on uninitialized Cube.");
 
-	roll += dtime * deltas[0];
-	pitch += dtime * deltas[1];
-	yaw += dtime * deltas[2];
-	theta += dtime * deltas[3];
-	phi += dtime * deltas[4];
-	chi += dtime * deltas[5];
+    roll += dtime * deltas[0];
+    pitch += dtime * deltas[1];
+    yaw += dtime * deltas[2];
+    theta += dtime * deltas[3];
+    phi += dtime * deltas[4];
+    chi += dtime * deltas[5];
 
-    transform = XMMatrixMultiplyTranspose(XMMatrixRotationRollPitchYaw(roll, pitch, yaw) * XMMatrixTranslation(radius, 0, 0),
-                                          XMMatrixTranslation(0, 0, 20) * XMMatrixPerspectiveLH(1, 0.75, 1, 10));
+    transform = XMMatrixMultiplyTranspose(
+        XMMatrixRotationRollPitchYaw(roll, pitch, yaw) * XMMatrixTranslation(radius, 0.0f, 0.0f) *
+            XMMatrixRotationRollPitchYaw(theta, phi, chi),
+        XMMatrixTranslation(0.0f, 0.0f, 20.0f) * XMMatrixPerspectiveLH(1.0f, 0.75f, 1.0f, 40.0f));
 
     shaders[0]->constant_buffers[0].Update(transform);
 }

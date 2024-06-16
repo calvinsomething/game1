@@ -26,14 +26,15 @@ class Cube : protected GfxAccess
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 
-	float radius;
-	float roll, pitch, yaw;
-	float theta, phi, chi;
-	
-	std::array<float, 6> deltas;
+    float radius;
+    float roll, pitch, yaw;
+    float theta, phi, chi;
+
+    std::array<float, 6> deltas;
 
   public:
     Cube(float radius, std::array<float, 6> deltas);
 
     void Draw();
+    void Update(float dtime);
 };

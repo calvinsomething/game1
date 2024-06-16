@@ -10,11 +10,12 @@
 #include <wrl.h>
 
 // STD
+#include <array>
 #include <cassert>
 #include <exception>
 #include <iterator>
 #include <memory>
 #include <random>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>

@@ -22,22 +22,22 @@ MainWindow::MainWindow()
 {
     pGfx = std::make_unique<Graphics>(hWnd);
 
-	auto& rfg = RFG::Get();
+    auto &rfg = RFG::Get();
 
-	const unsigned cubesCt = 20;
+    const unsigned cubesCt = 10;
 
     cubes.reserve(cubesCt);
-	for (int i = 0; i < cubesCt; i++)
-	{
-		cubes.push_back(std::make_unique<Cube>(rfg(3, 20), {
-			rfg(0, 1),
-			rfg(0, 1),
-			rfg(0, 1),
-			rfg(0, 1),
-			rfg(0, 1),
-			rfg(0, 1),
-		}));
-	}
+    for (int i = 0; i < cubesCt; i++)
+    {
+        cubes.push_back(std::make_unique<Cube>(rfg(1.0f, 10.0f), std::array<float, 6>{
+                                                                     rfg(0.0f, 1.0f),
+                                                                     rfg(0.0f, 1.0f),
+                                                                     rfg(0.0f, 1.0f),
+                                                                     rfg(0.0f, 1.0f),
+                                                                     rfg(0.0f, 1.0f),
+                                                                     rfg(0.0f, 1.0f),
+                                                                 }));
+    }
 }
 
 MainWindow::~MainWindow()
@@ -50,7 +50,7 @@ void MainWindow::RenderFrame()
 
     for (auto &c : cubes)
     {
-        c->Update();
+        c->Update(0.03f);
         c->Draw();
     }
 

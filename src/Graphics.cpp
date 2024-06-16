@@ -30,6 +30,8 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     scd.BufferCount = 1;
     scd.OutputWindow = hWnd;
     scd.Windowed = TRUE;
+    // TODO Should use below... need to find out why it crashes.
+    // scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     scd.Flags = 0;
 
@@ -52,8 +54,42 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     GfxAccess::pDevice = pDevice.Get();
     GfxAccess::pCtx = pCtx.Get();
 
+    D3D11_DEPTH_STENCIL_DESC dsd = {};
+    dsd.DepthEnable = TRUE;
+    dsd.DepthFunc = D3D11_COMPARISON_LESS;
+    dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pStencilState;
+    THROW_IF_FAILED(pDevice->CreateDepthStencilState(&dsd, pStencilState.GetAddressOf()));
+
+    pCtx->OMSetDepthStencilState(pStencilState.Get(), 0);
+    CHECK_ERRORS();
+
+    D3D11_TEXTURE2D_DESC td = {};
+    td.Width = 804;
+    td.Height = 581;
+    td.Usage = D3D11_USAGE_DEFAULT;
+    td.MipLevels = 1;
+    td.ArraySize = 1;
+    td.Format = DXGI_FORMAT_D32_FLOAT;
+    td.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+    td.SampleDesc.Count = 1;
+    td.SampleDesc.Quality = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> pStencil;
+    THROW_IF_FAILED(pDevice->CreateTexture2D(&td, nullptr, pStencil.GetAddressOf()));
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvd = {};
+    dsvd.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    dsvd.Texture2D = {};
+
+    THROW_IF_FAILED(pDevice->CreateDepthStencilView(pStencil.Get(), &dsvd, pStencilView.GetAddressOf()));
+
     // set render target
-    pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), nullptr);
+    pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
+    CHECK_ERRORS();
 
     // set viewport
     D3D11_VIEWPORT vp;
@@ -63,7 +99,9 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     vp.TopLeftY = 0;
     vp.MinDepth = 0;
     vp.MaxDepth = 1;
+
     pCtx->RSSetViewports(1, &vp);
+    CHECK_ERRORS();
 }
 
 Graphics::~Graphics()
@@ -74,6 +112,7 @@ void Graphics::Clear(Color<float> color)
 {
     color.a = 1;
     pCtx->ClearRenderTargetView(pTarget.Get(), reinterpret_cast<float *>(&color));
+    pCtx->ClearDepthStencilView(pStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);
 }
 
 void Graphics::EndFrame()

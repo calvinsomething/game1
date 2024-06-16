@@ -23,7 +23,9 @@ class Graphics
     Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
     Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> pCtx;
+
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pStencilView;
 
   public:
     Graphics(HWND hWnd);

@@ -17,8 +17,19 @@ GfxDebug::GfxDebug() : msg_index(), info_desc_index(), full()
     THROW_IF_FAILED(
         DXGIGetDebugInterface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void **>(pInfoQueue.GetAddressOf())));
 
+    DXGI_INFO_QUEUE_MESSAGE_SEVERITY deny_list[3] = {
+        DXGI_INFO_QUEUE_MESSAGE_SEVERITY_INFO,
+        DXGI_INFO_QUEUE_MESSAGE_SEVERITY_MESSAGE,
+        DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING,
+    };
+
+    DXGI_INFO_QUEUE_FILTER filter = {};
+    filter.DenyList = {};
+    filter.DenyList.NumSeverities = 3;
+    filter.DenyList.pSeverityList = deny_list;
+
     pInfoQueue->PushEmptyStorageFilter(DXGI_DEBUG_ALL);
-    pInfoQueue->PushEmptyRetrievalFilter(DXGI_DEBUG_ALL);
+    pInfoQueue->PushRetrievalFilter(DXGI_DEBUG_ALL, &filter);
 
     memset(info_desc, 0, sizeof(info_desc));
 }

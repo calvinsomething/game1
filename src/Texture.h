@@ -1,14 +1,26 @@
 #pragma once
 
+#include <WICTextureLoader.h>
+
 #include "Graphics.h"
 
 class Texture
 {
         ComPtr<ID3D11ShaderResourceView> pView;
 public:
-    Texture(const char* file_name)
+    Texture(const wchar_t* file_name)
     {
         using namespace Microsoft::WRL;
+
+        THROW_IF_FAILED(D3DX11CreateTextureFromFile(
+            _In_  ID3D11Device           *pDevice,
+            _In_  LPCTSTR                pSrcFile,
+            _In_  D3DX11_IMAGE_LOAD_INFO *pLoadInfo,
+            _In_  ID3DX11ThreadPump      *pPump,
+            _Out_ ID3D11Resource         **ppTexture,
+            _Out_ HRESULT                *pHResult
+        ));
+
 
         D3D11_TEXTURE2D_DESC td = {};
         td.Width = 0;
@@ -39,3 +51,36 @@ public:
         pDevice->CreateShaderResourceView(&pTex.Get(), &srvd, pView.GetAddressOf());
     }
 };
+
+void* load_file(const wchar_t* file_name)
+{
+    // ------
+    THROW_IF_FAILED(CoCreateInstance(
+        [in]  REFCLSID  rclsid,
+        [in]  LPUNKNOWN pUnkOuter,
+        [in]  DWORD     dwClsContext,
+        [in]  REFIID    riid,
+        [out] LPVOID    *ppv
+    ));
+
+    ComPtr<IWICBitmapDecoder> pBitmapDecoder;
+
+    THROW_IF_FAILED(CreateDecoderFromFilename(
+        file_name,
+        [in]          const GUID        *pguidVendor,
+        [in]          DWORD             dwDesiredAccess,
+        [in]          WICDecodeOptions  metadataOptions,
+        pBitmapDecoder.GetAddressOf()
+    ));
+
+    ComPtr<IWICBitmapFrameDecode> pFrameDecode;
+
+    THROW_IF_FAILED(GetFrame(
+        [in]  UINT                  index,
+        pFrameDecode.GetAddressOf()
+    ));
+
+    WICPixelFormatGUID pixelFormat;
+
+    THROW_IF_FAILED(pFrameDecode->GetPixelFormat(*pixelFormat));
+}

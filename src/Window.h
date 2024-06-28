@@ -12,8 +12,11 @@
             throw get_windows_exception(GetLastError(), __FILE__, __LINE__);                                           \
         }                                                                                                              \
     }
-#undef THROW_IF_FAILED
+
+#ifndef THROW_IF_FAILED
 #define THROW_IF_FAILED(fn) THROW_IF_ERROR(FAILED(fn))
+#endif
+
 #define THROW_IF_FALSE(value) THROW_IF_ERROR(!value)
 
 Exception get_windows_exception(HRESULT error_code, const char *file, unsigned line);

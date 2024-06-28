@@ -30,7 +30,7 @@ template <typename T> class VertexBuffer : public VertexBufferBase
         D3D11_SUBRESOURCE_DATA sd{};
         sd.pSysMem = vertices;
 
-        THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
+        GFX_DEBUG(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
     }
 };
 

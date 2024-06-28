@@ -2,15 +2,15 @@
 
 PixelShader::PixelShader(const wchar_t *file_name) : Shader(file_name)
 {
-    THROW_IF_FAILED(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
-                                               reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
+    GFX_DEBUG(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
+                                         reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
 }
 
 PixelShader::PixelShader(const wchar_t *file_name, std::vector<ConstantBuffer> &&constant_buffers)
     : Shader(file_name, std::move(constant_buffers))
 {
-    THROW_IF_FAILED(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
-                                               reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
+    GFX_DEBUG(pDevice->CreatePixelShader(pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(), nullptr,
+                                         reinterpret_cast<ID3D11PixelShader **>(pDxShader.GetAddressOf())));
 };
 
 void PixelShader::Bind()

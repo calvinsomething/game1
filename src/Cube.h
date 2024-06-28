@@ -9,6 +9,7 @@ class Cube : protected GfxAccess
 
     static std::vector<std::unique_ptr<Buffer>> buffers;
     static std::vector<std::unique_ptr<Shader>> shaders;
+    static std::vector<std::unique_ptr<Bindable>> bindables;
 
     static constexpr DirectX::XMVECTOR vertices[8] = {
         {-1, 1, -1, 1}, {1, 1, -1, 1}, {1, -1, -1, 1}, {-1, -1, -1, 1},

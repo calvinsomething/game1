@@ -17,8 +17,8 @@ class Shader : public Bindable
 
     template <size_t N> void SetInputLayout(D3D11_INPUT_ELEMENT_DESC (&&ied)[N])
     {
-        THROW_IF_FAILED(pDevice->CreateInputLayout(ied, N, pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(),
-                                                   pInputLayout.GetAddressOf()));
+        GFX_DEBUG(pDevice->CreateInputLayout(ied, N, pByteCode->GetBufferPointer(), pByteCode->GetBufferSize(),
+                                             pInputLayout.GetAddressOf()));
     }
 
     std::vector<ConstantBuffer> constant_buffers;

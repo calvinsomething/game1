@@ -2,6 +2,8 @@
 
 #include "IndexBuffer.h"
 #include "PixelShader.h"
+#include "SamplerState.h"
+#include "Texture.h"
 #include "VertexBuffer.h"
 #include "VertexShader.h"
 
@@ -12,6 +14,7 @@ bool Cube::initialized = false;
 
 std::vector<std::unique_ptr<Buffer>> Cube::buffers;
 std::vector<std::unique_ptr<Shader>> Cube::shaders;
+std::vector<std::unique_ptr<Bindable>> Cube::bindables;
 
 Cube::Cube(float radius, decltype(deltas) deltas)
     : radius(radius), deltas(deltas), roll(), pitch(), yaw(), theta(), phi(), chi()
@@ -33,6 +36,10 @@ Cube::Cube(float radius, decltype(deltas) deltas)
         // PS
         shaders.push_back(
             std::make_unique<PixelShader>(L"shaders/pixel.cso", std::vector<ConstantBuffer>{{face_colors}}));
+
+        bindables.reserve(2);
+        bindables.push_back(std::make_unique<Texture>(L"assets/textures/di.png"));
+        bindables.push_back(std::make_unique<SamplerState>());
 
         initialized = true;
     }

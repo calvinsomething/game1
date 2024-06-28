@@ -8,7 +8,7 @@ ConstantBuffer::ConstantBuffer(size_t byte_width)
     bd.Usage = D3D11_USAGE_DYNAMIC;
     bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, nullptr, pBuffer.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateBuffer(&bd, nullptr, pBuffer.GetAddressOf()));
 }
 
 ID3D11Buffer *ConstantBuffer::GetBuffer()

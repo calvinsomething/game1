@@ -40,16 +40,15 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-    THROW_IF_FAILED(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, create_device_flags,
-                                                  nullptr, 0, D3D11_SDK_VERSION, &scd, pSwapChain.GetAddressOf(),
-                                                  pDevice.GetAddressOf(), nullptr, pCtx.GetAddressOf()));
+    GFX_DEBUG(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, create_device_flags, nullptr, 0,
+                                            D3D11_SDK_VERSION, &scd, pSwapChain.GetAddressOf(), pDevice.GetAddressOf(),
+                                            nullptr, pCtx.GetAddressOf()));
 
     ComPtr<ID3D11Resource> pSurface;
 
-    THROW_IF_FAILED(
-        pSwapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void **>(pSurface.GetAddressOf())));
+    GFX_DEBUG(pSwapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void **>(pSurface.GetAddressOf())));
 
-    THROW_IF_FAILED(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));
 
     GfxAccess::pDevice = pDevice.Get();
     GfxAccess::pCtx = pCtx.Get();
@@ -60,7 +59,7 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     dsd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pStencilState;
-    THROW_IF_FAILED(pDevice->CreateDepthStencilState(&dsd, pStencilState.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateDepthStencilState(&dsd, pStencilState.GetAddressOf()));
 
     pCtx->OMSetDepthStencilState(pStencilState.Get(), 0);
     CHECK_ERRORS();
@@ -78,14 +77,14 @@ Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.
     td.SampleDesc.Quality = 0;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> pStencil;
-    THROW_IF_FAILED(pDevice->CreateTexture2D(&td, nullptr, pStencil.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateTexture2D(&td, nullptr, pStencil.GetAddressOf()));
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvd = {};
     dsvd.Format = DXGI_FORMAT_D32_FLOAT;
     dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsvd.Texture2D = {};
 
-    THROW_IF_FAILED(pDevice->CreateDepthStencilView(pStencil.Get(), &dsvd, pStencilView.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateDepthStencilView(pStencil.Get(), &dsvd, pStencilView.GetAddressOf()));
 
     // set render target
     pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());

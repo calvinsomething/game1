@@ -19,13 +19,13 @@ class ConstantBuffer : private GfxAccess
         D3D11_SUBRESOURCE_DATA sd = {};
         sd.pSysMem = &input;
 
-        THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
+        GFX_DEBUG(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
     }
 
     template <typename T> void Update(const T &input)
     {
         D3D11_MAPPED_SUBRESOURCE msr{};
-        THROW_IF_FAILED(pCtx->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr));
+        GFX_DEBUG(pCtx->Map(pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr));
 
         memcpy(msr.pData, &input, sizeof(input));
 

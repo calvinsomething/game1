@@ -23,7 +23,7 @@ void IndexBuffer::Init(const unsigned *indices, size_t byte_width)
     D3D11_SUBRESOURCE_DATA sd{};
     sd.pSysMem = indices;
 
-    THROW_IF_FAILED(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
+    GFX_DEBUG(pDevice->CreateBuffer(&bd, &sd, pBuffer.GetAddressOf()));
 }
 
 void IndexBuffer::Bind()

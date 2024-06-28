@@ -19,3 +19,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+// Vendor
+#include "Microsoft/WICTextureLoader.h"

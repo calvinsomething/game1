@@ -1,8 +1,7 @@
 #pragma once
 
-#include "interfaces.h"
-
 #include "ConstantBuffer.h"
+#include "interfaces.h"
 
 class Shader : public Bindable
 {

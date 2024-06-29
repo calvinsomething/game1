@@ -1,15 +1,23 @@
 #include "Graphics.h"
 
+// needed for get_windows_exception
 #include "Window.h"
 
 namespace dx = DirectX;
 
-// Static definitions
+// GfxAccess
 ID3D11Device *GfxAccess::pDevice = nullptr;
 ID3D11DeviceContext *GfxAccess::pCtx = nullptr;
+dx::XMMATRIX GfxAccess::CameraPosition = dx::XMMatrixTranslation(0.0f, 0.0f, 20.0f);
+dx::XMMATRIX GfxAccess::ProjectionMatrix = dx::XMMatrixPerspectiveLH(1.0f, 0.75f, 1.0f, 40.0f);
+
+dx::XMMATRIX GfxAccess::ToNDCSpace(dx::XMMATRIX mat)
+{
+    return dx::XMMatrixMultiplyTranspose(mat, CameraPosition * ProjectionMatrix);
+}
 
 // Graphics
-Graphics::Graphics(HWND hWnd) : ProjectionMatrix(dx::XMMatrixPerspectiveLH(1, 0.75, 1, 50))
+Graphics::Graphics(HWND hWnd)
 {
     using namespace Microsoft::WRL;
 

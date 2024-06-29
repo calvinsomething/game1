@@ -13,9 +13,14 @@ class GfxAccess
 {
     friend class Graphics;
 
+    static DirectX::XMMATRIX CameraPosition;
+    static DirectX::XMMATRIX ProjectionMatrix;
+
   protected:
     static ID3D11Device *pDevice;
     static ID3D11DeviceContext *pCtx;
+
+    DirectX::XMMATRIX ToNDCSpace(DirectX::XMMATRIX mat);
 };
 
 class Graphics
@@ -32,8 +37,6 @@ class Graphics
     ~Graphics();
     Graphics(const Graphics &) = delete;
     Graphics &operator=(const Graphics &) = delete;
-
-    DirectX::XMMATRIX ProjectionMatrix;
 
     void Clear(Color<float> color);
     void EndFrame();

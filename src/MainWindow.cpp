@@ -18,7 +18,7 @@ LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 // Methods
 MainWindow::MainWindow()
     : Window("MainWindow", 0, WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE, wndProc,
-             "world_icon")
+             "world_icon", 1280, 720)
 {
     pGfx = std::make_unique<Graphics>(hWnd);
 

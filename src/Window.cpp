@@ -13,7 +13,7 @@ Exception get_windows_exception(HRESULT error_code, const char *file, unsigned l
 
 // Window
 Window::Window(const char *className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc,
-               const char *iconName)
+               const char *iconName, unsigned width, unsigned height)
 {
     WNDCLASSA wc{};
 
@@ -28,8 +28,8 @@ Window::Window(const char *className, unsigned long windowExStyle, unsigned long
 
     THROW_IF_FALSE(RegisterClassA(&wc));
 
-    hWnd = CreateWindowExA(windowExStyle, className, className, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, 820, 620,
-                           nullptr, nullptr, wc.hInstance, nullptr);
+    hWnd = CreateWindowExA(windowExStyle, className, className, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, width,
+                           height, nullptr, nullptr, wc.hInstance, nullptr);
     THROW_IF_FALSE(hWnd);
 }
 

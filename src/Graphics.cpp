@@ -1,6 +1,6 @@
 #include "Graphics.h"
 
-// needed for get_windows_exception
+// needed for THROW_IF_DEVICE_REMOVED
 #include "Window.h"
 
 namespace dx = DirectX;
@@ -23,16 +23,16 @@ Graphics::Graphics(HWND hWnd)
 
     DXGI_SWAP_CHAIN_DESC scd{};
 
-    scd.BufferDesc.Width = 0;
-    scd.BufferDesc.Height = 0;
-    scd.BufferDesc.RefreshRate.Numerator = 0;
+    // scd.BufferDesc.Width = 0;
+    // scd.BufferDesc.Height = 0;
+    // scd.BufferDesc.RefreshRate.Numerator = 0;
     scd.BufferDesc.RefreshRate.Denominator = 1;
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
     scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
     scd.SampleDesc.Count = 1;
-    scd.SampleDesc.Quality = 0;
+    // scd.SampleDesc.Quality = 0;
 
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     scd.BufferCount = 1;
@@ -72,9 +72,12 @@ Graphics::Graphics(HWND hWnd)
     pCtx->OMSetDepthStencilState(pStencilState.Get(), 0);
     CHECK_ERRORS();
 
+    // fill scd with width/height values
+    THROW_IF_FAILED(pSwapChain->GetDesc(&scd));
+
     D3D11_TEXTURE2D_DESC td = {};
-    td.Width = 804;
-    td.Height = 581;
+    td.Width = scd.BufferDesc.Width;
+    td.Height = scd.BufferDesc.Height;
     td.Usage = D3D11_USAGE_DEFAULT;
     td.MipLevels = 1;
     td.ArraySize = 1;
@@ -100,8 +103,8 @@ Graphics::Graphics(HWND hWnd)
 
     // set viewport
     D3D11_VIEWPORT vp;
-    vp.Width = 800;
-    vp.Height = 600;
+    vp.Width = scd.BufferDesc.Width;
+    vp.Height = scd.BufferDesc.Height;
     vp.TopLeftX = 0;
     vp.TopLeftY = 0;
     vp.MinDepth = 0;

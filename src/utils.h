@@ -2,27 +2,45 @@
 
 #include "pch.h"
 
-class RFG
+class RNG
 {
     std::mt19937 engine;
-    std::unordered_map<long long, std::uniform_real_distribution<float>> distributions;
-    std::uniform_real_distribution<float> *loaded;
 
-    RFG() : engine(std::random_device{}())
+    std::unordered_map<long long, std::uniform_real_distribution<float>> r_distributions;
+    std::unordered_map<long long, std::uniform_int_distribution<int>> i_distributions;
+
+    std::uniform_real_distribution<float> *r_loaded;
+    std::uniform_int_distribution<int> *i_loaded;
+
+    RNG() : engine(std::random_device{}())
     {
     }
 
-    long long make_key(float a, float b);
+    template <typename T> long long make_key(T a, T b)
+    {
+        static_assert(sizeof(T) == 4, "RNG::make_key requires a 4-byte type.");
+        struct
+        {
+            T x;
+            T y;
+        } bits;
+        bits.x = a;
+        bits.y = b;
+        return *(reinterpret_cast<long long *>(&bits));
+    }
 
   public:
-    RFG(const RFG &) = delete;
-    RFG operator=(const RFG &) = delete;
+    RNG(const RNG &) = delete;
+    RNG operator=(const RNG &) = delete;
 
-    static RFG &Get();
+    static RNG &Get();
 
     void Load(float min, float max);
+    void Load(int min, int max);
 
     float operator()(float min, float max);
+    int operator()(int min, int max);
 
-    float RunLoaded();
+    float GetNextFloat();
+    int GetNextInt();
 };

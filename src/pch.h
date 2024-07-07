@@ -1,4 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 
 // Microsoft
 #include <DirectXMath.h>
@@ -18,6 +19,7 @@
 #include <exception>
 #include <iterator>
 #include <memory>
+#include <mutex>
 #include <random>
 #include <string>
 #include <thread>

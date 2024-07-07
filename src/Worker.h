@@ -11,6 +11,15 @@ class Worker
     {
     }
 
+    Worker(const Worker &) = delete;
+    Worker operator=(const Worker &) = delete;
+    Worker operator=(Worker &&) = delete;
+
+    Worker(Worker &&other)
+    {
+        thread.swap(other.thread);
+    };
+
     ~Worker()
     {
         if (thread.joinable())

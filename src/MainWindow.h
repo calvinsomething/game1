@@ -13,6 +13,8 @@ class MainWindow : public Window
     std::unique_ptr<Graphics> pGfx;
     std::unique_ptr<Camera> pCamera;
 
+    std::mutex mouse_mutex;
+
     std::vector<std::unique_ptr<Cube>> cubes;
 
   public:
@@ -22,7 +24,8 @@ class MainWindow : public Window
     MainWindow(const MainWindow &) = delete;
     MainWindow &operator=(const MainWindow &) = delete;
 
-    void MouseMove(LPARAM lParam);
+    void MouseMove(short x, short y);
+    void SetMouseLeftButtonDown(bool left_button_down);
 
     void RenderFrame();
     InputDevices::Mouse mouse = {};

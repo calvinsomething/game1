@@ -44,3 +44,10 @@ class RNG
     float GetNextFloat();
     int GetNextInt();
 };
+
+template <typename T> bool abs_compare(T a, T b)
+{
+    const T diff = a - b;
+    const T sum = a + b;
+    return (diff > 0 && sum > 0) || (diff < 0 && sum < 0);
+}

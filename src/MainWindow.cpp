@@ -5,6 +5,7 @@
 // Static
 LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    MainWindow *w = reinterpret_cast<MainWindow *>(GetWindowLongPtrA(hWnd, 0));
     switch (msg)
     {
     case WM_NCCREATE: {
@@ -13,15 +14,17 @@ LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
         break;
     }
     case WM_MOUSEMOVE: {
-        reinterpret_cast<MainWindow *>(GetWindowLongPtrA(hWnd, 0))->MouseMove(lParam);
+        short x = GET_X_LPARAM(lParam);
+        short y = GET_Y_LPARAM(lParam);
+        w->MouseMove(x, y);
         break;
     }
     case WM_LBUTTONDOWN: {
-        reinterpret_cast<MainWindow *>(GetWindowLongPtrA(hWnd, 0))->mouse.left_button_down = true;
+        w->SetMouseLeftButtonDown(true);
         break;
     }
     case WM_LBUTTONUP: {
-        reinterpret_cast<MainWindow *>(GetWindowLongPtrA(hWnd, 0))->mouse.left_button_down = false;
+        w->SetMouseLeftButtonDown(false);
         break;
     }
     // case WM_INPUT: {
@@ -41,7 +44,6 @@ LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
     //    const RAWINPUT &raw_input = *reinterpret_cast<RAWINPUT *>(ri);
     //    if (raw_input.header.dwType)
     //    {
-    //        MainWindow *w = reinterpret_cast<MainWindow *>(GetWindowLongPtrA(hWnd, 0));
     //        w->mouse.left_button_down =
     //            (w->mouse.left_button_down || (raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)) &&
     //            !(raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP);
@@ -67,19 +69,22 @@ void MainWindow::log()
     throw std::exception(buf);
 }
 
-void MainWindow::MouseMove(LPARAM lParam)
+void MainWindow::SetMouseLeftButtonDown(bool left_button_down)
 {
-    short x = GET_X_LPARAM(lParam);
-    short y = GET_Y_LPARAM(lParam);
+    std::lock_guard<std::mutex> lock(mouse_mutex);
+    mouse.left_button_down = left_button_down;
+}
+
+void MainWindow::MouseMove(short x, short y)
+{
+    std::lock_guard<std::mutex> lock(mouse_mutex);
 
     if (mouse.left_button_down)
     {
-        mouse.Delta.x = x - mouse.Position.x;
-        mouse.Delta.y = y - mouse.Position.y;
-    }
-    else
-    {
-        mouse.Delta = {};
+        short nextX = x - mouse.Position.x;
+        short nextY = y - mouse.Position.y;
+        mouse.Delta.x = abs_compare(mouse.Delta.x, nextX) ? mouse.Delta.x : nextX;
+        mouse.Delta.y = abs_compare(mouse.Delta.y, nextY) ? mouse.Delta.y : nextY;
     }
 
     mouse.Position.x = x;
@@ -122,10 +127,13 @@ void MainWindow::RenderFrame()
 {
     pGfx->Clear({0.3f, 0.6f, 0.4f});
 
-    const float mouse_speed = 0.01f * mouse.left_button_down;
+    {
+        std::lock_guard<std::mutex> lock(mouse_mutex);
+        const float mouse_speed = 0.04f * mouse.left_button_down;
 
-    pCamera->Revolve(mouse_speed * mouse.Delta.x, mouse_speed * mouse.Delta.y);
-    mouse.Delta = {};
+        pCamera->Revolve(mouse_speed * mouse.Delta.x, mouse_speed * mouse.Delta.y);
+        mouse.Delta = {};
+    }
 
     for (auto &c : cubes)
     {

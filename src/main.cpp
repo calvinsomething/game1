@@ -47,7 +47,8 @@ void MessagePump()
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char *pCmdLine, int nCmdShow)
 {
-    Worker window_thread = {MessagePump};
+    // Worker window_thread = {MessagePump};
+    is_running = true;
     while (!is_running)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -55,13 +56,23 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char *pCmdLin
 
     try
     {
+        MainWindow window{};
+        p_window = &window;
+
+        MSG msg = {};
         while (is_running)
         {
-            p_window->RenderFrame();
-            if (input_thread_did_throw)
+            PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE);
+            if (msg.message == WM_QUIT)
             {
-                throw input_thread_exception;
+                exit_code = msg.wParam;
+                is_running = false;
+                break;
             }
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+
+            p_window->RenderFrame();
         }
     }
     catch (const std::exception &e)

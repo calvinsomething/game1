@@ -1,10 +1,10 @@
 #include "Exception.h"
 
-#define ADD_HEADER(name) \
+#define ADD_HEADING(name) \
 {\
-	constexpr char header[] = "[" #name "]: ";\
-	if (strcpy_s(_what + i, n - i, header)) return;\
-	i += sizeof(header);\
+	constexpr char heading[] = "[" #name "]: ";\
+	if (strcpy_s(_what + i, n - i, heading)) return;\
+	i += sizeof(heading);\
 }
 
 char Exception::_what[1024];
@@ -21,14 +21,14 @@ Exception::Exception(const char* message, int error_code, const char* file, int 
 	memset(_what + i, '\n', 2);
 	i += 2;
 
-	ADD_HEADER(Error Code);
+	ADD_HEADING(Error Code);
 	_itoa_s(error_code, _what + i - 1, n - i, 10);
 	i += strlen(_what + i);
 
 	memset(_what + i, '\n', 2);
 	i += 2;
 
-	ADD_HEADER(File);
+	ADD_HEADING(File);
 	if (strcpy_s(_what + i - 1, n - i, file)) return;
 	i += strlen(file);
 

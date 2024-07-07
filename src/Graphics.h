@@ -11,10 +11,11 @@ extern GfxDebug gfxDebug;
 
 class GfxAccess
 {
+    friend class Camera;
     friend class Graphics;
 
-    static DirectX::XMMATRIX CameraPosition;
     static DirectX::XMMATRIX ProjectionMatrix;
+    static DirectX::XMMATRIX ViewProjectionMatrix;
 
   protected:
     static ID3D11Device *pDevice;

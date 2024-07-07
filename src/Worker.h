@@ -7,12 +7,15 @@ class Worker
     std::thread thread;
 
   public:
-    template <typename T, typename... Args> Worker(T (*fn)(Args...), Args &&...args) : thread(fn, args...)
+    template <typename T, typename... Args> Worker(T (*fn)(Args...), Args &&...args) : thread(fn, std::forward(args)...)
     {
     }
 
     ~Worker()
     {
-        thread.join();
+        if (thread.joinable())
+        {
+            thread.join();
+        }
     }
 };

@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME} WIN32
 	src/GfxDebug.cpp
 	src/Graphics.cpp
 	src/IndexBuffer.cpp
+	src/InputDevices.cpp
 	src/MainWindow.cpp
 	src/PixelShader.cpp
 	src/SamplerState.cpp

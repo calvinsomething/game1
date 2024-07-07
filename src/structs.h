@@ -20,3 +20,19 @@ template <unsigned N, unsigned M> struct Matrix
 {
     float elements[N][M];
 };
+
+struct MouseInput
+{
+    struct
+    {
+        short x;
+        short y;
+    } Position;
+    struct
+    {
+        short x;
+        short y;
+    } Delta;
+
+    bool LeftButtonDown;
+};

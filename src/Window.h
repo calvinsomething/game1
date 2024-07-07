@@ -30,7 +30,7 @@ class Window
 
   public:
     Window(const char *className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc,
-           const char *iconName, unsigned width, unsigned height);
+           const char *iconName, unsigned width, unsigned height, void *lParam);
     virtual ~Window();
 
     Window(const Window &) = delete;

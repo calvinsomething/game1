@@ -6,7 +6,9 @@
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
 #include <dxgi.h>
+#include <hidusage.h>
 #include <windows.h>
+#include <windowsx.h>
 #include <wrl.h>
 
 // STD

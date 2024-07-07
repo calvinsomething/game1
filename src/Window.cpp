@@ -13,13 +13,14 @@ Exception get_windows_exception(HRESULT error_code, const char *file, unsigned l
 
 // Window
 Window::Window(const char *className, unsigned long windowExStyle, unsigned long windowStyle, WNDPROC wndProc,
-               const char *iconName, unsigned width, unsigned height)
+               const char *iconName, unsigned width, unsigned height, void *lParam)
 {
     WNDCLASSA wc{};
 
     wc.hInstance = GetModuleHandleA(nullptr);
     wc.lpszClassName = className;
     wc.lpfnWndProc = wndProc;
+    wc.cbWndExtra = sizeof(lParam);
 
     if (iconName)
     {
@@ -29,7 +30,7 @@ Window::Window(const char *className, unsigned long windowExStyle, unsigned long
     THROW_IF_FALSE(RegisterClassA(&wc));
 
     hWnd = CreateWindowExA(windowExStyle, className, className, windowStyle, CW_USEDEFAULT, CW_USEDEFAULT, width,
-                           height, nullptr, nullptr, wc.hInstance, nullptr);
+                           height, nullptr, nullptr, wc.hInstance, lParam);
     THROW_IF_FALSE(hWnd);
 }
 

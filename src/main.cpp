@@ -18,17 +18,28 @@ void MessagePump()
         is_running = true;
 
         MSG msg = {};
+        BOOL result;
         while (is_running)
         {
-            PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE);
-            if (msg.message == WM_QUIT)
+            if ((result = GetMessageA(&msg, NULL, 0, 0)) != 0)
             {
-                exit_code = msg.wParam;
-                is_running = false;
-                break;
+                if (result == -1)
+                {
+                    throw Exception("Invalid HWND.", result, __FILE__, __LINE__);
+                }
+                else if (msg.message == WM_QUIT)
+                {
+                    exit_code = msg.wParam;
+                    is_running = false;
+                    break;
+                }
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
             }
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            else
+            {
+                is_running = 0;
+            }
         }
     }
     catch (std::exception &e)
@@ -48,7 +59,7 @@ void MessagePump()
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char *pCmdLine, int nCmdShow)
 {
     Worker window_thread = {MessagePump};
-    while (!is_running)
+    while (!is_running && !input_thread_did_throw)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -58,10 +69,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char *pCmdLin
         while (is_running)
         {
             p_window->RenderFrame();
-            if (input_thread_did_throw)
-            {
-                throw input_thread_exception;
-            }
+        }
+        if (input_thread_did_throw)
+        {
+            throw input_thread_exception;
         }
     }
     catch (const std::exception &e)

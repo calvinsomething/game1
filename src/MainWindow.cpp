@@ -77,7 +77,7 @@ MainWindow::MainWindow()
              "world_icon", 1280, 720, this)
 {
     pGfx = std::make_unique<Graphics>(hWnd);
-    pCamera = std::make_unique<Camera>();
+    pGUI = std::make_unique<GUI>(hWnd);
 
     mouse = InputDevices::GetMouse();
 
@@ -108,10 +108,11 @@ void MainWindow::RenderFrame()
     pGfx->Clear({0.3f, 0.6f, 0.4f});
 
     {
+        // TODO use atomic if this is even necessary
         std::lock_guard<std::mutex> lock(mouse_mutex);
         const float mouse_speed = 0.04f * mouse.left_button_down;
 
-        pCamera->Revolve(mouse_speed * mouse.Delta.x, mouse_speed * mouse.Delta.y);
+        camera.Revolve(mouse_speed * mouse.Delta.x, mouse_speed * mouse.Delta.y);
         mouse.Delta = {};
     }
 
@@ -119,6 +120,7 @@ void MainWindow::RenderFrame()
     {
         c->Update(0.03f);
         c->Draw();
+        pGUI->Render();
     }
 
     pGfx->EndFrame();

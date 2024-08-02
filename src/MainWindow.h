@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "Cube.h"
+#include "GUI.h"
 #include "Graphics.h"
 #include "InputDevices.h"
 #include "Window.h"
@@ -11,7 +12,8 @@ class MainWindow : public Window
     static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     std::unique_ptr<Graphics> pGfx;
-    std::unique_ptr<Camera> pCamera;
+    std::unique_ptr<GUI> pGUI;
+    Camera camera;
 
     std::mutex mouse_mutex;
 

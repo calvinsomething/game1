@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 
 add_executable(${PROJECT_NAME} WIN32
+	${SOURCE_DIR}/Box.cpp
 	${SOURCE_DIR}/ConstantBuffer.cpp
 	${SOURCE_DIR}/Cube.cpp
 	${SOURCE_DIR}/Exception.cpp

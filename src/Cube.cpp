@@ -11,11 +11,9 @@ using namespace DirectX;
 
 bool Cube::initialized = false;
 
-std::vector<std::unique_ptr<Bindable>> Cube::bindables;
 VertexShader *Cube::vs;
 
-Cube::Cube(float radius, decltype(deltas) deltas)
-    : radius(radius), deltas(deltas), yaw(), pitch(), roll(), psi(), theta(), phi()
+Cube::Cube(float radius, decltype(deltas) deltas) : Box(radius, deltas, std::size(indices))
 {
     if (!initialized)
     {
@@ -47,31 +45,7 @@ void Cube::Update(float dtime)
 {
     assert(initialized && "Draw called on uninitialized Cube.");
 
-    yaw += dtime * deltas[0];
-    pitch += dtime * deltas[1];
-    roll += dtime * deltas[2];
-    psi += dtime * deltas[3];
-    theta += dtime * deltas[4];
-    phi += dtime * deltas[5];
-
-    transform = ToNDCSpace(XMMatrixRotationRollPitchYaw(yaw, pitch, roll) * XMMatrixTranslation(radius, 0.0f, 0.0f) *
-                           XMMatrixRotationRollPitchYaw(psi, theta, phi));
+    move(dtime);
 
     vs->constant_buffers[0].Update(transform);
-}
-
-void Cube::Draw()
-{
-    assert(initialized && "Draw called on uninitialized Cube.");
-
-    for (auto &b : bindables)
-    {
-        b->Bind();
-    }
-
-    pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    CHECK_ERRORS();
-
-    pCtx->DrawIndexed(std::size(indices), 0, 0);
-    CHECK_ERRORS();
 }

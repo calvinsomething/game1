@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Box.h"
+
 #include "VertexShader.h"
 
 #define TC(c1, c2)                                                                                                     \
@@ -13,11 +15,10 @@ struct Vertex
     DirectX::XMFLOAT2 TexCoord;
 };
 
-class Cube : protected GfxAccess
+class Cube : public Box
 {
     static bool initialized;
 
-    static std::vector<std::unique_ptr<Bindable>> bindables;
     static VertexShader *vs;
 
     static constexpr Vertex vertices[] = {
@@ -33,19 +34,8 @@ class Cube : protected GfxAccess
         {1, 0, 0, 1}, {1, 1, 0, 1}, {1, 0, 1, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 1, 1, 1},
     };
 
-    DirectX::XMMATRIX transform;
-
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-
-    float radius;
-    float yaw, pitch, roll;
-    float psi, theta, phi;
-
-    std::array<float, 6> deltas;
-
   public:
     Cube(float radius, std::array<float, 6> deltas);
 
-    void Draw();
-    void Update(float dtime);
+    void Update(float dtime) override;
 };

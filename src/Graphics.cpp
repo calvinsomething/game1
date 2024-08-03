@@ -38,7 +38,7 @@ Graphics::Graphics(HWND hWnd)
     scd.BufferCount = 1;
     scd.OutputWindow = hWnd;
     scd.Windowed = TRUE;
-    // TODO Should use below... need to find out why it crashes.
+    // TODO Should use below with 2 back buffers
     // scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     scd.Flags = 0;
@@ -54,6 +54,7 @@ Graphics::Graphics(HWND hWnd)
 
     ComPtr<ID3D11Resource> pSurface;
 
+    // TODO should get buffer 1 as well to use a flip effect
     GFX_DEBUG(pSwapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void **>(pSurface.GetAddressOf())));
 
     GFX_DEBUG(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));

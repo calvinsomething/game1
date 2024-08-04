@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include "Cube.h"
+#include "Sphere.h"
 #include "utils.h"
 
 // Static
@@ -83,12 +85,11 @@ MainWindow::MainWindow()
 
     auto &rng = RNG::Get();
 
-    const unsigned cubesCt = 10;
+    boxes.reserve(20);
 
-    cubes.reserve(cubesCt);
-    for (int i = 0; i < cubesCt; i++)
+    for (int i = 0; i < boxes.capacity() / 2; i++)
     {
-        cubes.push_back(std::make_unique<Cube>(rng(1.0f, 15.0f), std::array<float, 6>{
+        boxes.push_back(std::make_unique<Cube>(rng(1.0f, 15.0f), std::array<float, 6>{
                                                                      rng(0.0f, 1.0f),
                                                                      rng(0.0f, 1.0f),
                                                                      rng(0.0f, 1.0f),
@@ -96,6 +97,14 @@ MainWindow::MainWindow()
                                                                      rng(0.0f, 1.0f),
                                                                      rng(0.0f, 1.0f),
                                                                  }));
+        boxes.push_back(std::make_unique<Sphere<10>>(rng(1.0f, 15.0f), std::array<float, 6>{
+                                                                           rng(0.0f, 1.0f),
+                                                                           rng(0.0f, 1.0f),
+                                                                           rng(0.0f, 1.0f),
+                                                                           rng(0.0f, 1.0f),
+                                                                           rng(0.0f, 1.0f),
+                                                                           rng(0.0f, 1.0f),
+                                                                       }));
     }
 }
 
@@ -116,10 +125,11 @@ void MainWindow::RenderFrame()
         mouse.Delta = {};
     }
 
-    for (auto &c : cubes)
+    // auto s = spheres.begin();
+    for (auto b = boxes.begin(); b != boxes.end(); b++)
     {
-        c->Update(0.03f);
-        c->Draw();
+        (*b)->Update(0.03f);
+        (*b)->Draw();
         pGUI->Render();
     }
 

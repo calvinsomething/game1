@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Box.h"
 #include "Camera.h"
-#include "Cube.h"
 #include "GUI.h"
 #include "Graphics.h"
 #include "InputDevices.h"
@@ -17,7 +17,7 @@ class MainWindow : public Window
 
     std::mutex mouse_mutex;
 
-    std::vector<std::unique_ptr<Cube>> cubes;
+    std::vector<std::unique_ptr<Box>> boxes;
 
   public:
     MainWindow();

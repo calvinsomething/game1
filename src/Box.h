@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VertexShader.h"
+#include "Graphics.h"
 
 #define TC(c1, c2)                                                                                                     \
     {                                                                                                                  \
@@ -10,9 +10,6 @@
 class Box : protected GfxAccess
 {
   protected:
-    static std::vector<std::unique_ptr<Bindable>> bindables;
-    static VertexShader *vs;
-
     void move(float dtime);
 
     DirectX::XMMATRIX transform;
@@ -27,8 +24,8 @@ class Box : protected GfxAccess
     std::array<float, 6> deltas;
 
   public:
-    Box(float radius, std::array<float, 6> deltas, unsigned indices_count);
+    Box(float radius, std::array<float, 6> deltas);
 
     virtual void Update(float dtime) = 0;
-    void Draw();
+    virtual void Draw() = 0;
 };

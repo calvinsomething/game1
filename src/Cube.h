@@ -9,17 +9,18 @@
         c1##.0f * 0.25f, c2##.0f * 0.333333f                                                                           \
     }
 
-struct Vertex
-{
-    DirectX::XMVECTOR Position;
-    DirectX::XMFLOAT2 TexCoord;
-};
-
 class Cube : public Box
 {
-    static bool initialized;
+    struct Vertex
+    {
+        DirectX::XMVECTOR Position;
+        DirectX::XMFLOAT2 TexCoord;
+    };
 
+    static std::vector<std::unique_ptr<Bindable>> bindables;
     static VertexShader *vs;
+
+    static bool initialized;
 
     static constexpr Vertex vertices[] = {
         {{1, 1, 1, 1}, TC(0, 1)},   {{-1, 1, 1, 1}, TC(1, 1)}, {{-1, 1, -1, 1}, TC(2, 1)}, {{-1, 1, 1, 1}, TC(2, 0)},
@@ -30,12 +31,9 @@ class Cube : public Box
     static constexpr unsigned indices[] = {0, 1, 12, 12, 13, 0, 1, 2, 11, 11, 12, 1, 2,  3, 4, 4, 5,  2,
                                            5, 6, 7,  7,  8,  5, 2, 5, 8,  8,  11, 2, 11, 8, 9, 9, 10, 11};
 
-    static constexpr DirectX::XMVECTOR face_colors[] = {
-        {1, 0, 0, 1}, {1, 1, 0, 1}, {1, 0, 1, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 1, 1, 1},
-    };
-
   public:
     Cube(float radius, std::array<float, 6> deltas);
 
     void Update(float dtime) override;
+    void Draw() override;
 };

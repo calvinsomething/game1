@@ -12,8 +12,9 @@ using namespace DirectX;
 bool Cube::initialized = false;
 
 VertexShader *Cube::vs;
+std::vector<std::unique_ptr<Bindable>> Cube::bindables;
 
-Cube::Cube(float radius, decltype(deltas) deltas) : Box(radius, deltas, std::size(indices))
+Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
 {
     if (!initialized)
     {
@@ -32,7 +33,6 @@ Cube::Cube(float radius, decltype(deltas) deltas) : Box(radius, deltas, std::siz
 
         // PS
         bindables.push_back(std::make_unique<PixelShader>(L"shaders/p_texture.cso"));
-        // std::make_unique<PixelShader>(L"shaders/p_texture.cso", std::vector<ConstantBuffer>{{face_colors}}));
 
         bindables.push_back(std::make_unique<Texture>(L"assets/textures/di.png"));
         bindables.push_back(std::make_unique<SamplerState>());
@@ -48,4 +48,18 @@ void Cube::Update(float dtime)
     move(dtime);
 
     vs->constant_buffers[0].Update(transform);
+}
+
+void Cube::Draw()
+{
+    for (auto &b : bindables)
+    {
+        b->Bind();
+    }
+
+    pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    CHECK_ERRORS();
+
+    pCtx->DrawIndexed(std::size(indices), 0, 0);
+    CHECK_ERRORS();
 }

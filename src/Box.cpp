@@ -3,11 +3,8 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-std::vector<std::unique_ptr<Bindable>> Box::bindables;
-VertexShader *Box::vs;
-
-Box::Box(float radius, decltype(deltas) deltas, unsigned indices_count)
-    : radius(radius), deltas(deltas), yaw(), pitch(), roll(), psi(), theta(), phi(), indices_count(indices_count)
+Box::Box(float radius, decltype(deltas) deltas)
+    : radius(radius), deltas(deltas), yaw(), pitch(), roll(), psi(), theta(), phi()
 {
 }
 
@@ -22,18 +19,4 @@ void Box::move(float dtime)
 
     transform = ToNDCSpace(XMMatrixRotationRollPitchYaw(yaw, pitch, roll) * XMMatrixTranslation(radius, 0.0f, 0.0f) *
                            XMMatrixRotationRollPitchYaw(psi, theta, phi));
-}
-
-void Box::Draw()
-{
-    for (auto &b : bindables)
-    {
-        b->Bind();
-    }
-
-    pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    CHECK_ERRORS();
-
-    pCtx->DrawIndexed(indices_count, 0, 0);
-    CHECK_ERRORS();
 }

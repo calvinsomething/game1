@@ -26,12 +26,8 @@ class MainWindow : public Window
     MainWindow(const MainWindow &) = delete;
     MainWindow &operator=(const MainWindow &) = delete;
 
-    void MouseMove(short x, short y);
-    void SetMouseLeftButtonDown(bool left_button_down);
-
     void RenderFrame();
     InputDevices::Mouse mouse = {};
 
     std::vector<char> raw_input;
-    void log();
 };

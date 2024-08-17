@@ -34,11 +34,15 @@ LRESULT CALLBACK MainWindow::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
         }
 
         const RAWINPUT &raw_input = *reinterpret_cast<RAWINPUT *>(ri);
-        w.mouse.left_button_down =
-            (w.mouse.left_button_down || (raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)) &&
-            !(raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP);
-        w.mouse.Delta.x = raw_input.data.mouse.lLastX;
-        w.mouse.Delta.y = raw_input.data.mouse.lLastY;
+
+        if (!w.pGUI->WantCaptureMouse())
+        {
+            w.mouse.left_button_down =
+                (w.mouse.left_button_down || (raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)) &&
+                !(raw_input.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP);
+            w.mouse.Delta.x = raw_input.data.mouse.lLastX;
+            w.mouse.Delta.y = raw_input.data.mouse.lLastY;
+        }
 
         break;
     }

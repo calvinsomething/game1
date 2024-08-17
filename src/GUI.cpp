@@ -5,6 +5,7 @@ GUI::GUI(HWND hWnd)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
     auto io = ImGui::GetIO();
 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
@@ -85,4 +86,9 @@ void GUI::Render()
                                              clear_color.z * clear_color.w, clear_color.w};
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+bool GUI::WantCaptureMouse()
+{
+    return ImGui::GetIO().WantCaptureMouse;
 }

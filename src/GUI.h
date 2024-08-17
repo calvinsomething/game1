@@ -9,4 +9,6 @@ class GUI : GfxAccess
     ~GUI();
 
     void Render();
+
+    bool WantCaptureMouse();
 };

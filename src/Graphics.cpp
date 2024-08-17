@@ -35,12 +35,10 @@ Graphics::Graphics(HWND hWnd)
     // scd.SampleDesc.Quality = 0;
 
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    scd.BufferCount = 1;
+    scd.BufferCount = 2;
     scd.OutputWindow = hWnd;
     scd.Windowed = TRUE;
-    // TODO Should use below with 2 back buffers
-    // scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-    scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
     scd.Flags = 0;
 
     unsigned create_device_flags = 0;
@@ -54,7 +52,6 @@ Graphics::Graphics(HWND hWnd)
 
     ComPtr<ID3D11Resource> pSurface;
 
-    // TODO should get buffer 1 as well to use a flip effect
     GFX_DEBUG(pSwapChain->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void **>(pSurface.GetAddressOf())));
 
     GFX_DEBUG(pDevice->CreateRenderTargetView(pSurface.Get(), nullptr, pTarget.GetAddressOf()));
@@ -121,6 +118,9 @@ Graphics::~Graphics()
 
 void Graphics::Clear(Color<float> color)
 {
+    pCtx->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
+    CHECK_ERRORS();
+
     color.a = 1;
     pCtx->ClearRenderTargetView(pTarget.Get(), reinterpret_cast<float *>(&color));
     pCtx->ClearDepthStencilView(pStencilView.Get(), D3D11_CLEAR_DEPTH, 1, 0);

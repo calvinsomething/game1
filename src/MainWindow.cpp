@@ -100,7 +100,6 @@ void MainWindow::RenderFrame()
         mouse.Delta = {};
     }
 
-    // auto s = spheres.begin();
     for (auto b = boxes.begin(); b != boxes.end(); b++)
     {
         (*b)->Update(0.03f);

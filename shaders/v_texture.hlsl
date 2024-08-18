@@ -1,6 +1,11 @@
-cbuffer CBuffer
+cbuffer CB1
 {
-	matrix transform;
+	matrix tf_model;
+};
+
+cbuffer CB2
+{
+	matrix tf_view_proj;
 };
 
 struct VSOut
@@ -11,8 +16,10 @@ struct VSOut
 
 VSOut main(float4 pos : Position, float2 tc : TexCoord)
 {
+	matrix mvp = mul(tf_model, tf_view_proj);
+
 	VSOut output;
-	output.pos = mul(pos, transform);
+	output.pos = mul(pos, mvp);
 	output.tc = tc;
 	return output;
 }

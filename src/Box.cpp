@@ -17,6 +17,7 @@ void Box::move(float dtime)
     theta += dtime * deltas[4];
     phi += dtime * deltas[5];
 
-    transform = ToNDCSpace(XMMatrixRotationRollPitchYaw(yaw, pitch, roll) * XMMatrixTranslation(radius, 0.0f, 0.0f) *
-                           XMMatrixRotationRollPitchYaw(psi, theta, phi));
+    transform = XMMatrixMultiplyTranspose(XMMatrixRotationRollPitchYaw(yaw, pitch, roll) *
+                                              XMMatrixTranslation(radius, 0.0f, 0.0f),
+                                          XMMatrixRotationRollPitchYaw(psi, theta, phi));
 }

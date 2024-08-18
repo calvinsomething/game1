@@ -18,6 +18,6 @@ class Camera : public GfxAccess
     void Revolve(float yaw, float pitch)
     {
         Rotation = Rotation * DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0);
-        GfxAccess::ViewProjectionMatrix = Rotation * Translation * GfxAccess::ProjectionMatrix;
+        GfxAccess::tf_camera = Rotation * Translation;
     }
 };

@@ -23,8 +23,8 @@ Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
         bindables.push_back(std::make_unique<IndexBuffer>(indices, sizeof(indices)));
 
         // VS
-        bindables.push_back(
-            std::make_unique<VertexShader>(L"shaders/v_texture.cso", std::vector<ConstantBuffer>{sizeof(transform)}));
+        bindables.push_back(std::make_unique<VertexShader>(
+            L"shaders/v_texture.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
         Cube::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
         vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -48,6 +48,7 @@ void Cube::Update(float dtime)
     move(dtime);
 
     vs->constant_buffers[0].Update(transform);
+    vs->constant_buffers[1].Update(get_mat_vp());
 }
 
 void Cube::Draw()

@@ -97,8 +97,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
             bindables.push_back(std::make_unique<IndexBuffer>(indices.data(), indices.size() * sizeof(indices[0])));
 
             // VS
-            bindables.push_back(
-                std::make_unique<VertexShader>(L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform)}));
+            bindables.push_back(std::make_unique<VertexShader>(
+                L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
             Sphere::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
             vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}});
@@ -111,16 +111,17 @@ template <unsigned latitude_divisions> class Sphere : public Box
         }
     }
 
-    void Update(float dtime)
+    void Update(float dtime) override
     {
         assert(initialized && "Draw called on uninitialized Sphere.");
 
         move(dtime);
 
         vs->constant_buffers[0].Update(transform);
+        vs->constant_buffers[1].Update(get_mat_vp());
     }
 
-    void Draw()
+    void Draw() override
     {
         for (auto &b : bindables)
         {

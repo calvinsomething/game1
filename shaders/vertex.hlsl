@@ -1,9 +1,15 @@
-cbuffer CBuffer
+cbuffer CB1
 {
-	matrix transform;
+	matrix tf_model;
+};
+
+cbuffer CB2
+{
+	matrix tf_view_proj;
 };
 
 float4 main(float4 pos : Position) : SV_Position
 {
-	return mul(pos, transform);
+	matrix mvp = mul(tf_model, tf_view_proj);
+	return mul(pos, mvp);
 }

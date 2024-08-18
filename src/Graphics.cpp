@@ -8,12 +8,12 @@ namespace dx = DirectX;
 // GfxAccess
 ID3D11Device *GfxAccess::pDevice = nullptr;
 ID3D11DeviceContext *GfxAccess::pCtx = nullptr;
-dx::XMMATRIX GfxAccess::ProjectionMatrix = dx::XMMatrixPerspectiveLH(1.0f, 0.75f, 1.0f, 80.0f);
-dx::XMMATRIX GfxAccess::ViewProjectionMatrix;
+dx::XMMATRIX GfxAccess::tf_projection = dx::XMMatrixPerspectiveLH(1.0f, 0.75f, 1.0f, 80.0f);
+dx::XMMATRIX GfxAccess::tf_camera;
 
-dx::XMMATRIX GfxAccess::ToNDCSpace(dx::XMMATRIX mat)
+DirectX::XMMATRIX GfxAccess::get_mat_vp()
 {
-    return dx::XMMatrixMultiplyTranspose(mat, ViewProjectionMatrix);
+    return dx::XMMatrixMultiplyTranspose(tf_camera, tf_projection);
 }
 
 // Graphics

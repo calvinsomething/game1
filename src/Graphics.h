@@ -14,14 +14,14 @@ class GfxAccess
     friend class Camera;
     friend class Graphics;
 
-    static DirectX::XMMATRIX ProjectionMatrix;
-    static DirectX::XMMATRIX ViewProjectionMatrix;
+    static DirectX::XMMATRIX tf_projection;
+    static DirectX::XMMATRIX tf_camera;
 
   protected:
     static ID3D11Device *pDevice;
     static ID3D11DeviceContext *pCtx;
 
-    DirectX::XMMATRIX ToNDCSpace(DirectX::XMMATRIX mat);
+    DirectX::XMMATRIX get_mat_vp();
 };
 
 class Graphics

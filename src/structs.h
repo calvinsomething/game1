@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.h"
+
 template <typename T> struct Color
 {
     T r;
@@ -8,12 +10,10 @@ template <typename T> struct Color
     T a;
 };
 
-struct Vec4
+struct Vertex
 {
-    float x;
-    float y;
-    float z;
-    float w;
+    DirectX::XMVECTOR Position;
+    DirectX::XMVECTOR Normal;
 };
 
 template <unsigned N, unsigned M> struct Matrix

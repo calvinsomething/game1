@@ -15,7 +15,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
     static std::vector<std::unique_ptr<Bindable>> bindables;
     static VertexShader *vs;
 
-    static std::vector<DirectX::XMVECTOR> vertices;
+    static std::vector<Vertex> vertices;
     static std::vector<unsigned> indices;
 
     static constexpr DirectX::XMVECTOR face_colors[6] = {
@@ -35,16 +35,16 @@ template <unsigned latitude_divisions> class Sphere : public Box
         XMMATRIX half_rotation_z = XMMatrixRotationZ(z_radians / 2);
         XMMATRIX rotation_y = XMMatrixRotationY(XM_PI / latitude_divisions);
 
-        vertices.push_back(XMVector4Transform(XMVECTOR{0, radius, 0, 1}, half_rotation_z));
+        vertices.push_back(Vertex{XMVector4Transform({0, radius, 0, 1}, half_rotation_z)});
         for (int i = 0; i < latitude_divisions; i++)
         {
-            vertices.push_back(XMVector4Transform(vertices[i], rotation_z));
+            vertices.push_back(Vertex{{XMVector4Transform(vertices[i].Position, rotation_z)}});
         }
 
         unsigned vertices_to_rotate = (longitude_divisions - 1) * latitude_lines;
         for (int i = 0; i < vertices_to_rotate; i++)
         {
-            vertices.push_back(XMVector4Transform(vertices[i], rotation_y));
+            vertices.push_back(Vertex{{XMVector4Transform(vertices[i].Position, rotation_y)}});
         }
 
         indices.reserve(latitude_divisions * (longitude_divisions + 1) * 6);
@@ -65,10 +65,16 @@ template <unsigned latitude_divisions> class Sphere : public Box
         }
 
         int top_pole = vertices.size();
-        vertices.push_back(XMVECTOR{0, XMVectorGetY(vertices[0]), 0, 1});
+        vertices.push_back(Vertex{{0, XMVectorGetY(vertices[0].Position), 0, 1}});
 
         int bottom_pole = top_pole + 1;
-        vertices.push_back(XMVECTOR{0, -XMVectorGetY(vertices[0]), 0, 1});
+        vertices.push_back(Vertex{{0, -XMVectorGetY(vertices[0].Position), 0, 1}});
+
+        // set normals
+        for (auto &v : vertices)
+        {
+            v.Normal = DirectX::XMVector3Normalize(v.Position);
+        }
 
         for (int i = 0; i < longitude_divisions; i++)
         {
@@ -92,8 +98,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
             set_vertices();
 
             bindables.reserve(4);
-            bindables.push_back(std::make_unique<VertexBuffer<DirectX::XMVECTOR>>(
-                vertices.data(), vertices.size() * sizeof(vertices[0])));
+            bindables.push_back(
+                std::make_unique<VertexBuffer<Vertex>>(vertices.data(), vertices.size() * sizeof(vertices[0])));
             bindables.push_back(std::make_unique<IndexBuffer>(indices.data(), indices.size() * sizeof(indices[0])));
 
             // VS
@@ -101,7 +107,9 @@ template <unsigned latitude_divisions> class Sphere : public Box
                 L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
             Sphere::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
-            vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}});
+            vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,
+                                 D3D11_INPUT_PER_VERTEX_DATA, 0}});
 
             // PS
             bindables.push_back(
@@ -140,5 +148,5 @@ template <unsigned latitude_divisions> bool Sphere<latitude_divisions>::initiali
 template <unsigned latitude_divisions> std::vector<std::unique_ptr<Bindable>> Sphere<latitude_divisions>::bindables;
 template <unsigned latitude_divisions> VertexShader *Sphere<latitude_divisions>::vs;
 
-template <unsigned latitude_divisions> std::vector<DirectX::XMVECTOR> Sphere<latitude_divisions>::vertices;
+template <unsigned latitude_divisions> std::vector<Vertex> Sphere<latitude_divisions>::vertices;
 template <unsigned latitude_divisions> std::vector<unsigned> Sphere<latitude_divisions>::indices;

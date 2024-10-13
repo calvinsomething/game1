@@ -12,8 +12,8 @@ template <typename T> struct Color
 
 struct Vertex
 {
-    DirectX::XMVECTOR Position;
-    DirectX::XMVECTOR Normal;
+    DirectX::XMFLOAT3 Position;
+    DirectX::XMFLOAT3 Normal;
 };
 
 template <unsigned N, unsigned M> struct Matrix

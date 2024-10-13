@@ -33,48 +33,55 @@ template <unsigned latitude_divisions> class Sphere : public Box
         float z_radians = XM_PI / latitude_lines;
         XMMATRIX rotation_z = XMMatrixRotationZ(z_radians);
         XMMATRIX half_rotation_z = XMMatrixRotationZ(z_radians / 2);
-        XMMATRIX rotation_y = XMMatrixRotationY(XM_PI / latitude_divisions);
+        XMMATRIX rotation_y = XMMatrixRotationY(-XM_PI / latitude_divisions);
 
-        vertices.push_back(Vertex{XMVector4Transform({0, radius, 0, 1}, half_rotation_z)});
+        vertices.emplace_back();
+        XMStoreFloat3(&vertices.back().Position, XMVector4Transform({0, radius, 0, 1}, half_rotation_z));
         for (int i = 0; i < latitude_divisions; i++)
         {
-            vertices.push_back(Vertex{{XMVector4Transform(vertices[i].Position, rotation_z)}});
+            auto p = XMLoadFloat3(&vertices[i].Position);
+            p = XMVector4Transform(p, rotation_z);
+
+            vertices.emplace_back();
+
+            XMStoreFloat3(&vertices.back().Position, p);
+            XMStoreFloat3(&vertices.back().Normal, XMVector3Normalize(p));
         }
 
         unsigned vertices_to_rotate = (longitude_divisions - 1) * latitude_lines;
         for (int i = 0; i < vertices_to_rotate; i++)
         {
-            vertices.push_back(Vertex{{XMVector4Transform(vertices[i].Position, rotation_y)}});
+            auto p = XMLoadFloat3(&vertices[i].Position);
+            p = XMVector4Transform(p, rotation_y);
+
+            vertices.emplace_back();
+
+            XMStoreFloat3(&vertices.back().Position, p);
+            XMStoreFloat3(&vertices.back().Normal, XMVector3Normalize(p));
         }
 
         indices.reserve(latitude_divisions * (longitude_divisions + 1) * 6);
 
         for (int i = 0; i < vertices.size();)
         {
-            int next_row = (i + latitude_lines) % vertices.size();
+            int next_column = (i + latitude_lines) % vertices.size();
 
             indices.push_back(i + 1);
             indices.push_back(i);
-            indices.push_back(next_row);
+            indices.push_back(next_column);
 
-            indices.push_back(next_row);
-            indices.push_back(next_row + 1);
+            indices.push_back(next_column);
+            indices.push_back(next_column + 1);
             indices.push_back(++i);
 
             i += !((i + 1) % latitude_lines);
         }
 
         int top_pole = vertices.size();
-        vertices.push_back(Vertex{{0, XMVectorGetY(vertices[0].Position), 0, 1}});
+        vertices.push_back(Vertex{{0, vertices[0].Position.y, 0}, {0, 1, 0}});
 
         int bottom_pole = top_pole + 1;
-        vertices.push_back(Vertex{{0, -XMVectorGetY(vertices[0].Position), 0, 1}});
-
-        // set normals
-        for (auto &v : vertices)
-        {
-            v.Normal = DirectX::XMVector3Normalize(v.Position);
-        }
+        vertices.push_back(Vertex{{0, -vertices[0].Position.y, 0}, {0, -1, 0}});
 
         for (int i = 0; i < longitude_divisions; i++)
         {
@@ -107,8 +114,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
                 L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
             Sphere::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
-            vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,
+            vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                {"Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,
                                  D3D11_INPUT_PER_VERTEX_DATA, 0}});
 
             // PS

@@ -14,13 +14,25 @@ struct VSOut
 	float lighting : COLOR1;
 };
 
-VSOut main(float4 pos : Position, float4 norm : NORMAL)
+static const float3 light_pos = {0.0f, 0.0f, 0.0f};
+static const float diffuse = 0.2f;
+
+VSOut main(float3 pos_in : Position, float3 norm : Normal)
 {
-	matrix mvp = mul(tf_world, tf_view_proj);
-	norm = float4(mul((float3)norm, (float3x3)tf_world), 1.0f);
+	float4 pos = float4(pos_in, 1);
+	pos.w = 1;
+	pos = mul(pos, tf_world);
+
+	norm = mul(norm, (float3x3)tf_world);
+
+	float3 vec_to_light = light_pos - (float3)pos;
+	float distance_to_light = length(vec_to_light);
+	float3 light_direction = vec_to_light / distance_to_light;
 
 	VSOut vso;
-	vso.pos = mul(pos, mvp);
-	vso.lighting = 0.6f;
+	vso.pos = mul(pos, tf_view_proj);
+
+	vso.lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
+
 	return vso;
 }

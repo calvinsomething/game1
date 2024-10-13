@@ -18,8 +18,8 @@ class Box : protected GfxAccess
     unsigned indices_count;
 
     float radius;
-    float yaw, pitch, roll;
-    float psi, theta, phi;
+    float pitch, yaw, roll;
+    float theta, psi, phi;
 
     std::array<float, 6> deltas;
 

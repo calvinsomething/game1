@@ -13,8 +13,8 @@ class Cube : public Box
 {
     struct Vertex
     {
-        DirectX::XMVECTOR Position;
-        DirectX::XMVECTOR Normal;
+        DirectX::XMFLOAT3 Position;
+        DirectX::XMFLOAT3 Normal;
         DirectX::XMFLOAT2 TexCoord;
     };
 

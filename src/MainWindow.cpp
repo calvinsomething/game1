@@ -92,7 +92,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::RenderFrame()
 {
-    pGfx->Clear({0.3f, 0.6f, 0.4f});
+    pGfx->Clear({0.1f, 0.11f, 0.16f});
 
     {
         const float mouse_speed = 0.04f * mouse.left_button_down;
@@ -100,10 +100,10 @@ void MainWindow::RenderFrame()
         mouse.Delta = {};
     }
 
-    for (auto b = boxes.begin(); b != boxes.end(); b++)
+    for (auto &b : boxes)
     {
-        (*b)->Update(0.03f);
-        (*b)->Draw();
+        b->Update(0.03f);
+        b->Draw();
         pGUI->Render();
     }
 

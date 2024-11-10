@@ -18,6 +18,8 @@ class Cube : public Box
         DirectX::XMFLOAT2 TexCoord;
     };
 
+    DirectX::XMMATRIX transform;
+
     static std::vector<std::unique_ptr<Bindable>> bindables;
     static VertexShader *vs;
 

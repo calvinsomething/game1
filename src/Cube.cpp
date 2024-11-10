@@ -22,6 +22,7 @@ Cube::Vertex Cube::vertices[] = {{{1, 1, 1}, {}, TC(0, 1)},   {{-1, 1, 1}, {}, T
 
 Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
 {
+    Box::transform = &transform;
     if (!initialized)
     {
         // set normals

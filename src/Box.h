@@ -12,7 +12,7 @@ class Box : protected GfxAccess
   protected:
     void move(float dtime);
 
-    DirectX::XMMATRIX transform;
+    DirectX::XMMATRIX *transform;
 
   private:
     unsigned indices_count;

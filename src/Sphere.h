@@ -18,9 +18,11 @@ template <unsigned latitude_divisions> class Sphere : public Box
     static std::vector<Vertex> vertices;
     static std::vector<unsigned> indices;
 
-    static constexpr DirectX::XMVECTOR face_colors[6] = {
-        {1, 0, 0, 1}, {1, 1, 0, 1}, {1, 0, 1, 1}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 1, 1, 1},
-    };
+    struct
+    {
+        DirectX::XMMATRIX transform;
+        DirectX::XMFLOAT4 color;
+    } cb;
 
     void set_vertices()
     {
@@ -34,6 +36,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
         XMMATRIX rotation_z = XMMatrixRotationZ(z_radians);
         XMMATRIX half_rotation_z = XMMatrixRotationZ(z_radians / 2);
         XMMATRIX rotation_y = XMMatrixRotationY(-XM_PI / latitude_divisions);
+
+        // TODO set normal per triangle face (also for cube)
 
         vertices.emplace_back();
         XMStoreFloat3(&vertices.back().Position, XMVector4Transform({0, radius, 0, 1}, half_rotation_z));
@@ -98,8 +102,15 @@ template <unsigned latitude_divisions> class Sphere : public Box
     }
 
   public:
-    Sphere(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
+    Sphere(float radius, std::array<float, 6> deltas, uint32_t color) : Box(radius, deltas)
     {
+        Box::transform = &cb.transform;
+
+        cb.color.x = (color >> 24) / 255;
+        cb.color.y = (color >> 16 & 0x000000FF) / 255;
+        cb.color.z = (color >> 24 & 0x000000FF) / 255;
+        cb.color.w = (color & 0x000000FF) / 255;
+
         if (!initialized)
         {
             set_vertices();
@@ -111,7 +122,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
 
             // VS
             bindables.push_back(std::make_unique<VertexShader>(
-                L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
+                L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(cb), sizeof(DirectX::XMMATRIX)}));
             Sphere::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
             vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -119,8 +130,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
                                  D3D11_INPUT_PER_VERTEX_DATA, 0}});
 
             // PS
-            bindables.push_back(
-                std::make_unique<PixelShader>(L"shaders/pixel.cso", std::vector<ConstantBuffer>({face_colors})));
+            bindables.push_back(std::make_unique<PixelShader>(L"shaders/pixel.cso"));
 
             initialized = true;
         }
@@ -132,7 +142,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
 
         move(dtime);
 
-        vs->constant_buffers[0].Update(transform);
+        vs->constant_buffers[0].Update(cb);
         vs->constant_buffers[1].Update(get_mat_vp());
     }
 

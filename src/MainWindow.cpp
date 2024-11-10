@@ -75,14 +75,16 @@ MainWindow::MainWindow()
                                                                      rng(0.0f, 1.0f),
                                                                      rng(0.0f, 1.0f),
                                                                  }));
-        boxes.push_back(std::make_unique<Sphere<10>>(rng(1.0f, 15.0f), std::array<float, 6>{
-                                                                           rng(0.0f, 1.0f),
-                                                                           rng(0.0f, 1.0f),
-                                                                           rng(0.0f, 1.0f),
-                                                                           rng(0.0f, 1.0f),
-                                                                           rng(0.0f, 1.0f),
-                                                                           rng(0.0f, 1.0f),
-                                                                       }));
+        boxes.push_back(std::make_unique<Sphere<10>>(rng(1.0f, 15.0f),
+                                                     std::array<float, 6>{
+                                                         rng(0.0f, 1.0f),
+                                                         rng(0.0f, 1.0f),
+                                                         rng(0.0f, 1.0f),
+                                                         rng(0.0f, 1.0f),
+                                                         rng(0.0f, 1.0f),
+                                                         rng(0.0f, 1.0f),
+                                                     },
+                                                     0x00FF00FF));
     }
 }
 

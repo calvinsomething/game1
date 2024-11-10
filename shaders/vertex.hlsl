@@ -1,6 +1,7 @@
 cbuffer CB1
 {
 	matrix tf_world;
+	float4 color;
 };
 
 cbuffer CB2
@@ -11,7 +12,7 @@ cbuffer CB2
 struct VSOut
 {
 	float4 pos : SV_Position;
-	float lighting : COLOR1;
+	float4 color : COLOR;
 };
 
 static const float3 light_pos = {0.0f, 0.0f, 0.0f};
@@ -32,7 +33,8 @@ VSOut main(float3 pos_in : Position, float3 norm : Normal)
 	VSOut vso;
 	vso.pos = mul(pos, tf_view_proj);
 
-	vso.lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
+	float lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
+	vso.color = color * lighting;
 
 	return vso;
 }

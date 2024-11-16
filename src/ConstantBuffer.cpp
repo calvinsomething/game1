@@ -11,6 +11,10 @@ ConstantBuffer::ConstantBuffer(size_t byte_width)
     GFX_DEBUG(pDevice->CreateBuffer(&bd, nullptr, pBuffer.GetAddressOf()));
 }
 
+ConstantBuffer::ConstantBuffer(ConstantBuffer &&other) : pBuffer(std::move(other.pBuffer))
+{
+}
+
 ID3D11Buffer *ConstantBuffer::GetBuffer()
 {
     return pBuffer.Get();

@@ -2,11 +2,6 @@
 
 #include "Graphics.h"
 
-#define TC(c1, c2)                                                                                                     \
-    {                                                                                                                  \
-        c1##.0f * 0.25f, c2##.0f * 0.333333f                                                                           \
-    }
-
 class Box : protected GfxAccess
 {
   protected:
@@ -25,6 +20,8 @@ class Box : protected GfxAccess
 
   public:
     Box(float radius, std::array<float, 6> deltas);
+
+    DirectX::XMVECTOR GetPosition();
 
     virtual void Update(float dtime) = 0;
     virtual void Draw() = 0;

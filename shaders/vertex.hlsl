@@ -1,10 +1,11 @@
-cbuffer CB1
+cbuffer ComponentData
 {
 	matrix tf_world;
 	float4 color;
+	bool is_light_source;
 };
 
-cbuffer CB2
+cbuffer GlobalData
 {
 	matrix tf_view_proj;
 };
@@ -26,15 +27,22 @@ VSOut main(float3 pos_in : Position, float3 norm : Normal)
 
 	norm = mul(norm, (float3x3)tf_world);
 
-	float3 vec_to_light = light_pos - (float3)pos;
-	float distance_to_light = length(vec_to_light);
-	float3 light_direction = vec_to_light / distance_to_light;
-
 	VSOut vso;
 	vso.pos = mul(pos, tf_view_proj);
 
-	float lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
-	vso.color = color * lighting;
+	if (is_light_source)
+	{
+		vso.color = color;
+	}
+	else
+	{
+		float3 vec_to_light = (float3)light_pos - (float3)pos;
+		float distance_to_light = length(vec_to_light);
+		float3 light_direction = vec_to_light / distance_to_light;
+
+		float lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
+		vso.color = color * lighting;
+	}
 
 	return vso;
 }

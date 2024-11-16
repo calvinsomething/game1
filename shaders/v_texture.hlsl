@@ -1,9 +1,9 @@
-cbuffer CB1
+cbuffer ComponentData
 {
 	matrix tf_world;
 };
 
-cbuffer CB2
+cbuffer GlobalData
 {
 	matrix tf_view_proj;
 };
@@ -24,7 +24,7 @@ VSOut main(float4 pos : Position, float3 norm : Normal, float2 tc : TexCoord)
 
 	norm = mul(norm, (float3x3)tf_world);
 
-	float3 vec_to_light = light_pos - (float3)pos;
+	float3 vec_to_light = (float3)light_pos - (float3)pos;
 	float distance_to_light = length(vec_to_light);
 	float3 light_direction = vec_to_light / distance_to_light;
 

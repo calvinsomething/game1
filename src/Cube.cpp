@@ -6,6 +6,11 @@
 #include "Texture.h"
 #include "VertexBuffer.h"
 
+#define TC(c1, c2)                                                                                                     \
+    {                                                                                                                  \
+        c1##.0f * 0.25f, c2##.0f * 0.333333f                                                                           \
+    }
+
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
@@ -37,9 +42,15 @@ Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
         bindables.push_back(std::make_unique<IndexBuffer>(indices, sizeof(indices)));
 
         // VS
-        bindables.push_back(std::make_unique<VertexShader>(
-            L"shaders/v_texture.cso", std::vector<ConstantBuffer>{sizeof(transform), sizeof(DirectX::XMMATRIX)}));
-        Cube::vs = dynamic_cast<VertexShader *>(bindables[2].get());
+        {
+            std::vector<ConstantBuffer> constant_buffers;
+            constant_buffers.reserve(2);
+            constant_buffers.emplace_back(sizeof(transform));
+            constant_buffers.emplace_back(sizeof(get_mat_vp()));
+
+            bindables.push_back(std::make_unique<VertexShader>(L"shaders/v_texture.cso", std::move(constant_buffers)));
+        }
+        vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
         vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
                             {"Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,

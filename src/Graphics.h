@@ -21,7 +21,7 @@ class GfxAccess
     static ID3D11Device *pDevice;
     static ID3D11DeviceContext *pCtx;
 
-    DirectX::XMMATRIX get_mat_vp();
+    static DirectX::XMMATRIX get_mat_vp();
 };
 
 class Graphics

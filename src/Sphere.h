@@ -22,6 +22,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
     {
         DirectX::XMMATRIX transform;
         DirectX::XMFLOAT4 color;
+        BOOL is_light_source;
     } cb;
 
     void set_vertices()
@@ -39,8 +40,14 @@ template <unsigned latitude_divisions> class Sphere : public Box
 
         // TODO set normal per triangle face (also for cube)
 
+        vertices.reserve((latitude_divisions - 1) * longitude_divisions + 2);
         vertices.emplace_back();
-        XMStoreFloat3(&vertices.back().Position, XMVector4Transform({0, radius, 0, 1}, half_rotation_z));
+        {
+            auto p = XMVector4Transform({0, radius, 0, 1}, half_rotation_z);
+            XMStoreFloat3(&vertices.back().Position, p);
+            XMStoreFloat3(&vertices.back().Normal, XMVector3Normalize(p));
+        }
+
         for (int i = 0; i < latitude_divisions; i++)
         {
             auto p = XMLoadFloat3(&vertices[i].Position);
@@ -102,14 +109,16 @@ template <unsigned latitude_divisions> class Sphere : public Box
     }
 
   public:
-    Sphere(float radius, std::array<float, 6> deltas, uint32_t color) : Box(radius, deltas)
+    Sphere(float radius, std::array<float, 6> deltas, uint32_t color, bool is_light_source = false)
+        : Box(radius, deltas)
     {
         Box::transform = &cb.transform;
 
-        cb.color.x = (color >> 24) / 255;
-        cb.color.y = (color >> 16 & 0x000000FF) / 255;
-        cb.color.z = (color >> 24 & 0x000000FF) / 255;
-        cb.color.w = (color & 0x000000FF) / 255;
+        cb.color.x = float(color >> 24) / 255;
+        cb.color.y = float(color >> 16 & 0x000000FF) / 255;
+        cb.color.z = float(color >> 8 & 0x000000FF) / 255;
+        cb.color.w = float(color & 0x000000FF) / 255;
+        cb.is_light_source = is_light_source;
 
         if (!initialized)
         {
@@ -121,8 +130,14 @@ template <unsigned latitude_divisions> class Sphere : public Box
             bindables.push_back(std::make_unique<IndexBuffer>(indices.data(), indices.size() * sizeof(indices[0])));
 
             // VS
-            bindables.push_back(std::make_unique<VertexShader>(
-                L"shaders/vertex.cso", std::vector<ConstantBuffer>{sizeof(cb), sizeof(DirectX::XMMATRIX)}));
+            {
+                std::vector<ConstantBuffer> constant_buffers;
+                constant_buffers.reserve(2);
+                constant_buffers.emplace_back(sizeof(cb));
+                constant_buffers.emplace_back(sizeof(get_mat_vp()));
+
+                bindables.push_back(std::make_unique<VertexShader>(L"shaders/vertex.cso", std::move(constant_buffers)));
+            }
             Sphere::vs = dynamic_cast<VertexShader *>(bindables[2].get());
 
             vs->SetInputLayout({{"Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},

@@ -21,3 +21,8 @@ void Box::move(float dtime)
                                                XMMatrixTranslation(radius, 0.0f, 0.0f),
                                            XMMatrixRotationRollPitchYaw(theta, psi, phi));
 }
+
+DirectX::XMVECTOR Box::GetPosition()
+{
+    return XMVector4Transform(XMVECTOR{0, 0, 0, 1}, *transform);
+}

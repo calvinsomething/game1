@@ -6,8 +6,8 @@ class RNG
 {
     std::mt19937 engine;
 
-    std::unordered_map<long long, std::uniform_real_distribution<float>> r_distributions;
-    std::unordered_map<long long, std::uniform_int_distribution<int>> i_distributions;
+    std::unordered_map<uint64_t, std::uniform_real_distribution<float>> r_distributions;
+    std::unordered_map<uint64_t, std::uniform_int_distribution<int>> i_distributions;
 
     std::uniform_real_distribution<float> *r_loaded;
     std::uniform_int_distribution<int> *i_loaded;
@@ -16,7 +16,7 @@ class RNG
     {
     }
 
-    template <typename T> long long make_key(T a, T b)
+    template <typename T> uint64_t make_key(T a, T b)
     {
         static_assert(sizeof(T) == 4, "RNG::make_key requires a 4-byte type.");
         struct
@@ -26,7 +26,7 @@ class RNG
         } bits;
         bits.x = a;
         bits.y = b;
-        return *(reinterpret_cast<long long *>(&bits));
+        return *(reinterpret_cast<uint64_t *>(&bits));
     }
 
   public:

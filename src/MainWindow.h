@@ -17,6 +17,9 @@ class MainWindow : public Window
 
     std::mutex mouse_mutex;
 
+    std::vector<std::unique_ptr<Box>> lights;
+    std::vector<DirectX::XMVECTOR> light_positions;
+
     std::vector<std::unique_ptr<Box>> boxes;
 
   public:

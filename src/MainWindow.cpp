@@ -63,6 +63,19 @@ MainWindow::MainWindow()
 {
     auto &rng = RNG::Get();
 
+    lights.reserve(1);
+    lights.push_back(std::make_unique<Sphere<2>>(rng(1.5f, 15.0f),
+                                                 std::array<float, 6>{
+                                                     rng(0.0f, 1.0f),
+                                                     rng(0.0f, 1.0f),
+                                                     rng(0.0f, 1.0f),
+                                                     rng(0.0f, 1.0f),
+                                                     rng(0.0f, 1.0f),
+                                                     rng(0.0f, 1.0f),
+                                                 },
+                                                 0xFFFFD0FF, true));
+    light_positions = std::vector<DirectX::XMVECTOR>(lights.size());
+
     boxes.reserve(20);
 
     for (int i = 0; i < boxes.capacity() / 2; i++)
@@ -102,12 +115,20 @@ void MainWindow::RenderFrame()
         mouse.Delta = {};
     }
 
+    for (size_t i = 0; i < lights.size(); i++)
+    {
+        lights[i]->Update(0.03f);
+        light_positions[i] = lights[i]->GetPosition();
+        lights[i]->Draw();
+    }
+
     for (auto &b : boxes)
     {
         b->Update(0.03f);
         b->Draw();
-        pGUI->Render();
     }
+
+    pGUI->Render();
 
     pGfx->EndFrame();
 }

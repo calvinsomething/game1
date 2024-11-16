@@ -8,6 +8,8 @@ class ConstantBuffer : private GfxAccess
 
   public:
     ConstantBuffer(size_t byte_width);
+    ConstantBuffer(const ConstantBuffer &other) = delete;
+    ConstantBuffer(ConstantBuffer &&other);
 
     template <typename T> ConstantBuffer(const T &input)
     {

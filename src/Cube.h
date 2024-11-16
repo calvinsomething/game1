@@ -4,11 +4,6 @@
 
 #include "VertexShader.h"
 
-#define TC(c1, c2)                                                                                                     \
-    {                                                                                                                  \
-        c1##.0f * 0.25f, c2##.0f * 0.333333f                                                                           \
-    }
-
 class Cube : public Box
 {
     struct Vertex

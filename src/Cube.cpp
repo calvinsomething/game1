@@ -45,8 +45,8 @@ Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
         {
             std::vector<ConstantBuffer> constant_buffers;
             constant_buffers.reserve(2);
+            constant_buffers.emplace_back(sizeof(get_global_data()));
             constant_buffers.emplace_back(sizeof(transform));
-            constant_buffers.emplace_back(sizeof(get_mat_vp()));
 
             bindables.push_back(std::make_unique<VertexShader>(L"shaders/v_texture.cso", std::move(constant_buffers)));
         }
@@ -74,8 +74,8 @@ void Cube::Update(float dtime)
 
     move(dtime);
 
-    vs->constant_buffers[0].Update(transform);
-    vs->constant_buffers[1].Update(get_mat_vp());
+    vs->constant_buffers[0].Update(get_global_data());
+    vs->constant_buffers[1].Update(transform);
 }
 
 void Cube::Draw()

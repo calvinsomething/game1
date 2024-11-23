@@ -73,8 +73,8 @@ MainWindow::MainWindow()
                                                      rng(0.0f, 1.0f),
                                                      rng(0.0f, 1.0f),
                                                  },
-                                                 0xFFFFD0FF, true));
-    light_positions = std::vector<DirectX::XMVECTOR>(lights.size());
+                                                 0xFFFFD0FF, false));
+    pGfx->SetLightCount(light_positions.size());
 
     boxes.reserve(20);
 
@@ -118,7 +118,9 @@ void MainWindow::RenderFrame()
     for (size_t i = 0; i < lights.size(); i++)
     {
         lights[i]->Update(0.03f);
-        light_positions[i] = lights[i]->GetPosition();
+        // TODO figure out why GetPosition is not working
+        // pGfx->SetLightPosition(i, lights[i]->GetPosition());
+        pGfx->SetLightPosition(i, DirectX::XMVECTOR{-40, 0, 0, 1});
         lights[i]->Draw();
     }
 

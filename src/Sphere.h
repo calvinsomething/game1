@@ -22,7 +22,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
     {
         DirectX::XMMATRIX transform;
         DirectX::XMFLOAT4 color;
-        BOOL is_light_source;
+        BOOL do_lighting;
     } cb;
 
     void set_vertices()
@@ -109,8 +109,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
     }
 
   public:
-    Sphere(float radius, std::array<float, 6> deltas, uint32_t color, bool is_light_source = false)
-        : Box(radius, deltas)
+    Sphere(float radius, std::array<float, 6> deltas, uint32_t color, bool do_lighting = true) : Box(radius, deltas)
     {
         Box::transform = &cb.transform;
 
@@ -118,7 +117,7 @@ template <unsigned latitude_divisions> class Sphere : public Box
         cb.color.y = float(color >> 16 & 0x000000FF) / 255;
         cb.color.z = float(color >> 8 & 0x000000FF) / 255;
         cb.color.w = float(color & 0x000000FF) / 255;
-        cb.is_light_source = is_light_source;
+        cb.do_lighting = do_lighting;
 
         if (!initialized)
         {
@@ -133,8 +132,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
             {
                 std::vector<ConstantBuffer> constant_buffers;
                 constant_buffers.reserve(2);
+                constant_buffers.emplace_back(sizeof(get_global_data()));
                 constant_buffers.emplace_back(sizeof(cb));
-                constant_buffers.emplace_back(sizeof(get_mat_vp()));
 
                 bindables.push_back(std::make_unique<VertexShader>(L"shaders/vertex.cso", std::move(constant_buffers)));
             }
@@ -157,8 +156,8 @@ template <unsigned latitude_divisions> class Sphere : public Box
 
         move(dtime);
 
-        vs->constant_buffers[0].Update(cb);
-        vs->constant_buffers[1].Update(get_mat_vp());
+        vs->constant_buffers[0].Update(get_global_data());
+        vs->constant_buffers[1].Update(cb);
     }
 
     void Draw() override

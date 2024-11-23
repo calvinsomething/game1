@@ -10,10 +10,12 @@ ID3D11Device *GfxAccess::pDevice = nullptr;
 ID3D11DeviceContext *GfxAccess::pCtx = nullptr;
 dx::XMMATRIX GfxAccess::tf_projection = dx::XMMatrixPerspectiveLH(1.0f, 0.75f, 1.0f, 80.0f);
 dx::XMMATRIX GfxAccess::tf_camera;
+GfxAccess::GlobalData GfxAccess::global_data;
 
-DirectX::XMMATRIX GfxAccess::get_mat_vp()
+const GfxAccess::GlobalData &GfxAccess::get_global_data()
 {
-    return dx::XMMatrixMultiplyTranspose(tf_camera, tf_projection);
+    global_data.tf_view_proj = dx::XMMatrixMultiplyTranspose(tf_camera, tf_projection);
+    return global_data;
 }
 
 // Graphics
@@ -114,6 +116,16 @@ Graphics::Graphics(HWND hWnd)
 
 Graphics::~Graphics()
 {
+}
+
+void Graphics::SetLightCount(size_t count)
+{
+    GfxAccess::global_data.light_count = count;
+}
+
+void Graphics::SetLightPosition(size_t i, DirectX::XMVECTOR position)
+{
+    GfxAccess::global_data.light_positions[i] = position;
 }
 
 void Graphics::Clear(Color<float> color)

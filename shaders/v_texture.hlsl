@@ -1,11 +1,13 @@
-cbuffer ComponentData
-{
-	matrix tf_world;
-};
-
 cbuffer GlobalData
 {
 	matrix tf_view_proj;
+	uint light_count;
+	float4 light_pos[4];
+};
+
+cbuffer ComponentData
+{
+	matrix tf_world;
 };
 
 struct VSOut
@@ -15,7 +17,6 @@ struct VSOut
 	float4 pos : SV_Position;
 };
 
-static const float3 light_pos = {0.0f, 0.0f, 0.0f};
 static const float diffuse = 0.2f;
 
 VSOut main(float4 pos : Position, float3 norm : Normal, float2 tc : TexCoord)
@@ -24,7 +25,7 @@ VSOut main(float4 pos : Position, float3 norm : Normal, float2 tc : TexCoord)
 
 	norm = mul(norm, (float3x3)tf_world);
 
-	float3 vec_to_light = (float3)light_pos - (float3)pos;
+	float3 vec_to_light = (float3)light_pos[0] - (float3)pos;
 	float distance_to_light = length(vec_to_light);
 	float3 light_direction = vec_to_light / distance_to_light;
 

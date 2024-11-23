@@ -14,14 +14,24 @@ class GfxAccess
     friend class Camera;
     friend class Graphics;
 
-    static DirectX::XMMATRIX tf_projection;
-    static DirectX::XMMATRIX tf_camera;
-
   protected:
     static ID3D11Device *pDevice;
     static ID3D11DeviceContext *pCtx;
 
-    static DirectX::XMMATRIX get_mat_vp();
+    struct GlobalData
+    {
+        DirectX::XMMATRIX tf_view_proj;
+        uint32_t light_count;
+        DirectX::XMVECTOR light_positions[4];
+    };
+
+    static const GlobalData &get_global_data();
+
+  private:
+    static DirectX::XMMATRIX tf_projection;
+    static DirectX::XMMATRIX tf_camera;
+
+    static GlobalData global_data;
 };
 
 class Graphics
@@ -38,6 +48,9 @@ class Graphics
     ~Graphics();
     Graphics(const Graphics &) = delete;
     Graphics &operator=(const Graphics &) = delete;
+
+    void SetLightCount(size_t count);
+    void SetLightPosition(size_t i, DirectX::XMVECTOR position);
 
     void Clear(Color<float> color);
     void EndFrame();

@@ -1,13 +1,15 @@
+cbuffer GlobalData
+{
+	matrix tf_view_proj;
+	uint light_count;
+	float4 light_pos[4];
+};
+
 cbuffer ComponentData
 {
 	matrix tf_world;
 	float4 color;
-	bool is_light_source;
-};
-
-cbuffer GlobalData
-{
-	matrix tf_view_proj;
+	bool do_lighting;
 };
 
 struct VSOut
@@ -16,7 +18,6 @@ struct VSOut
 	float4 color : COLOR;
 };
 
-static const float3 light_pos = {0.0f, 0.0f, 0.0f};
 static const float diffuse = 0.2f;
 
 VSOut main(float3 pos_in : Position, float3 norm : Normal)
@@ -30,18 +31,18 @@ VSOut main(float3 pos_in : Position, float3 norm : Normal)
 	VSOut vso;
 	vso.pos = mul(pos, tf_view_proj);
 
-	if (is_light_source)
+	if (do_lighting)
 	{
-		vso.color = color;
-	}
-	else
-	{
-		float3 vec_to_light = (float3)light_pos - (float3)pos;
+		float3 vec_to_light = (float3)light_pos[0] - (float3)pos;
 		float distance_to_light = length(vec_to_light);
 		float3 light_direction = vec_to_light / distance_to_light;
 
 		float lighting = saturate(saturate(dot(norm, light_direction) + (1 / distance_to_light)) + diffuse);
 		vso.color = color * lighting;
+	}
+	else
+	{
+		vso.color = color;
 	}
 
 	return vso;

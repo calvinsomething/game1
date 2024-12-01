@@ -4,20 +4,26 @@
 
 class Camera : public GfxAccess
 {
-    float yaw = 0, pitch = 0, roll = 0;
-    float psi = 0, theta = 0, phi = 0;
+    float pitch = 0, yaw = 0, roll = 0;
+    float theta = 0, psi = 0, phi = 0;
 
-    DirectX::XMMATRIX Rotation;
-    DirectX::XMMATRIX Translation;
+    DirectX::XMMATRIX rotation;
+    DirectX::XMMATRIX translation;
 
   public:
-    Camera() : Rotation(DirectX::XMMatrixIdentity()), Translation(DirectX::XMMatrixTranslation(0, 0, 50))
+    Camera() : rotation(DirectX::XMMatrixIdentity()), translation(DirectX::XMMatrixTranslation(0, 0, 50))
     {
     }
 
-    void Revolve(float yaw, float pitch)
+    void Revolve(float theta, float psi)
     {
-        Rotation = Rotation * DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0);
-        GfxAccess::tf_camera = Rotation * Translation;
+        rotation = rotation * DirectX::XMMatrixRotationRollPitchYaw(psi, theta, 0);
+        tf_camera = rotation * translation;
+    }
+
+    void Done()
+    {
+        global_data.camera_position =
+            DirectX::XMVectorScale(DirectX::XMVector4Transform(global_data.camera_position, tf_camera), -1);
     }
 };

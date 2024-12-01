@@ -64,7 +64,7 @@ MainWindow::MainWindow()
     auto &rng = RNG::Get();
 
     lights.reserve(1);
-    lights.push_back(std::make_unique<Sphere<2>>(rng(1.5f, 15.0f),
+    lights.push_back(std::make_unique<Sphere<5>>(rng(1.5f, 15.0f),
                                                  std::array<float, 6>{
                                                      rng(0.0f, 1.0f),
                                                      rng(0.0f, 1.0f),
@@ -112,21 +112,20 @@ void MainWindow::RenderFrame()
     {
         const float mouse_speed = 0.04f * mouse.left_button_down;
         camera.Revolve(mouse_speed * mouse.Delta.x, mouse_speed * mouse.Delta.y);
+        camera.Done();
         mouse.Delta = {};
     }
 
     for (size_t i = 0; i < lights.size(); i++)
     {
-        lights[i]->Update(0.03f);
-        // TODO figure out why GetPosition is not working
-        // pGfx->SetLightPosition(i, lights[i]->GetPosition());
-        pGfx->SetLightPosition(i, DirectX::XMVECTOR{-40, 0, 0, 1});
+        lights[i]->Update(0.01f);
+        pGfx->SetLightPosition(i, lights[i]->GetPosition());
         lights[i]->Draw();
     }
 
     for (auto &b : boxes)
     {
-        b->Update(0.03f);
+        b->Update(0.01f);
         b->Draw();
     }
 

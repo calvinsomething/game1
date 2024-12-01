@@ -38,8 +38,6 @@ template <unsigned latitude_divisions> class Sphere : public Box
         XMMATRIX half_rotation_z = XMMatrixRotationZ(z_radians / 2);
         XMMATRIX rotation_y = XMMatrixRotationY(-XM_PI / latitude_divisions);
 
-        // TODO set normal per triangle face (also for cube)
-
         vertices.reserve((latitude_divisions - 1) * longitude_divisions + 2);
         vertices.emplace_back();
         {

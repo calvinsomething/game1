@@ -1,10 +1,9 @@
 Texture2D tex : register(t0);
 SamplerState smpl : register(s0);
 
-float4 main(float2 tc : TexCoord, float flat_lighting : COLOR1, float4 pos : SV_Position) : SV_Target
+float4 main(float2 tc : TexCoord, float lighting : COLOR1, float4 pos : SV_Position, float specular : FLOAT) : SV_Target
 {
-	// TODO specular highlighting
+	float4 color = tex.Sample(smpl, tc) * lighting;
 
-	float4 color = tex.Sample(smpl, tc);
-	return color * flat_lighting;
+	return float4(saturate((float3)color + float3(color.r + 0.7f, color.g + 0.7f, color.b + 0.7f) * (pow(specular, 2))), color.a);
 }

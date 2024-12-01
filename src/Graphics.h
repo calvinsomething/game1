@@ -21,6 +21,7 @@ class GfxAccess
     struct GlobalData
     {
         DirectX::XMMATRIX tf_view_proj;
+        DirectX::XMVECTOR camera_position;
         uint32_t light_count;
         DirectX::XMVECTOR light_positions[4];
     };

@@ -24,5 +24,5 @@ void Box::move(float dtime)
 
 DirectX::XMVECTOR Box::GetPosition()
 {
-    return XMVector4Transform(XMVECTOR{0, 0, 0, 1}, *transform);
+    return XMVector4Transform(XMVECTOR{0, 0, 0, 1}, XMMatrixTranspose(*transform));
 }

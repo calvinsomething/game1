@@ -34,6 +34,8 @@ Cube::Cube(float radius, std::array<float, 6> deltas) : Box(radius, deltas)
         for (auto &v : vertices)
         {
             auto p = DirectX::XMLoadFloat3(&v.Position);
+            // TODO
+            // set normal per triangle, or input an array of normals per face
             DirectX::XMStoreFloat3(&v.Normal, DirectX::XMVector3Normalize(p));
         }
 
